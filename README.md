@@ -1,4 +1,21 @@
-# Chomp
+<p align="center">
+  <img src="docs/icon.png" width="112" alt="Chomp's icon: an amber C on graphite">
+</p>
+
+<h1 align="center">Chomp</h1>
+
+<p align="center">
+  <b>A personal AI assistant that lives on your own machine.</b><br>
+  Claude Code or Codex agents with memory, rules, boards, a live browser and an iPhone app.
+</p>
+
+<p align="center">
+  <a href="https://github.com/ggi3201/chompbot/actions/workflows/ci.yml"><img src="https://github.com/ggi3201/chompbot/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-f2a33a" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/node-22%20%7C%2024-3c873a" alt="Node 22 or 24">
+  <img src="https://img.shields.io/badge/tests-1%2C300%2B-2ea44f" alt="1,300+ tests">
+  <img src="https://img.shields.io/badge/iOS-SwiftUI-0a84ff" alt="iOS app in SwiftUI">
+</p>
 
 A personal AI assistant that runs on your own machine. You chat with it in a web app,
 on Telegram or Discord, or by voice, and every message runs as an agent turn in the
@@ -37,8 +54,12 @@ why and how.
 - **Your server, in a browser tab.** Monitoring of the machine and its containers
   and ports, a file browser, a terminal, a live preview of whatever an agent is
   building, and static sites it can publish for you.
-- **Phone.** An optional SwiftUI app and home-screen widget, with push
-  notifications and time-windowed cards ("leave for the airport in 20 minutes").
+- **A native iPhone app.** Chat and talk to it, see what's next on a home-screen
+  widget, and answer it from the lock screen (details below).
+- **Insights.** A dashboard of what your agents actually did: runs per day, success
+  rate, which model did the work, how long turns take, which rules fire.
+- **Try before you trust.** Dry-run a rule against real data before you switch it
+  on, and switch any skill or rule off with one tap.
 
 <table>
   <tr>
@@ -50,6 +71,41 @@ why and how.
     <td><img src="docs/screenshots/skills.png" alt="Skills: the seeded skills, each switchable on and off"></td>
   </tr>
 </table>
+
+## Insights
+
+Every agent run, message, rule check and tool call is counted, so you can see what
+your assistant is doing and what it costs you in machine time.
+
+![Insights: messages, agent runs, success rate and agent hours, a 24-hour chart and a year of runs](docs/screenshots/insights.png)
+
+![Insights charts: when you use it, runs per week by outcome, which model did the work, how long a turn takes](docs/screenshots/insights-charts.png)
+
+## The iPhone app
+
+A native SwiftUI app and widget in [`packages/ios`](packages/ios). It talks straight to
+your own Chomp over Tailscale.
+
+- **Chat and voice.** The same conversations as the web app, with charts and cards
+  drawn natively, plus a hands-free voice mode.
+- **Widget.** Time-windowed cards on your home and lock screen: when to leave, what
+  is next today, gate and seat.
+- **Ask Chomp from anywhere.** A Siri and Shortcuts action that takes a question and
+  an optional photo.
+- **Answers from the lock screen.** Approve or decline what a supervised agent wants
+  to do, or reply to its question, with Face ID.
+- **Your phone as a tool.** With your permission, agents can read your calendar,
+  contacts, photos, Health data and location, post notifications and run Shortcuts.
+
+Build it with Xcode and XcodeGen, using your own bundle ID and team
+([`SETUP.md`](SETUP.md) has the steps).
+
+## Tested
+
+Around 1,300 tests: 1,100 for the API, 140 for the web app, 74 XCTests for the iOS
+app, and suites for the CLI and the outside probe. Every push and pull request runs
+the build, a type check and the tests on Node 22 and 24
+([`ci.yml`](.github/workflows/ci.yml)).
 
 The screenshots are from a fresh install with sample data.
 
@@ -101,8 +157,7 @@ docs/             Configuration, deploy and design notes
 [`AGENTS.md`](AGENTS.md) (and `.claude/CLAUDE.md`) is the guide for coding agents:
 commands, conventions, and how tests run. Frontend specifics are in
 [`packages/web/CLAUDE.md`](packages/web/CLAUDE.md). Run `pnpm test` and `pnpm build`
-before you commit; pull requests run the same checks in GitHub Actions
-([`ci.yml`](.github/workflows/ci.yml)). Settings specific to one installation go in `.env` and are
+before you commit; pull requests run the same checks in GitHub Actions. Settings specific to one installation go in `.env` and are
 described in [`docs/configuration.md`](docs/configuration.md), never in source files.
 
 ## License

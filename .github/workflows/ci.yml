@@ -30,6 +30,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      # The preview tests drive a browser: use Playwright's matched one, not the runner's Google Chrome (it hangs there).
+      - run: pnpm --filter @chomp/api exec playwright-core install --with-deps --only-shell chromium
       - run: pnpm build
       - run: npx tsc --noEmit -p packages/web/tsconfig.json
       - run: pnpm test
