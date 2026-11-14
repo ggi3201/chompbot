@@ -1,0 +1,8 @@
+// Copy Config.local.xcconfig.example to Config.local.xcconfig for your own build.
+// Existing server settings saved in the app take precedence over this default.
+// Your own bundle id: the app and its widget share data through the app group group.<id>.
+CHOMP_BUNDLE_ID = com.example.chomp
+CHOMP_DEFAULT_SERVER_HOST =
+DEVELOPMENT_TEAM =
+
+#include? "Config.local.xcconfig"

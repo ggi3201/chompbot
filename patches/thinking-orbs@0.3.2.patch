@@ -1,0 +1,30 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index f1089af1ab1b0f49935016fe8312373f3ac4e492..c5e15d1bb8c59b7d431c768e8f6e289ca5b616ab 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -714,8 +714,8 @@ function ThinkingOrb({
+     };
+     frame(performance.now() / 1e3 * effSpeed);
+     let visible = true;
+-    const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver(([entry]) => {
+-      visible = entry.isIntersecting;
++    const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver((entries) => {
++      visible = entries[entries.length - 1].isIntersecting;
+       if (visible && document.visibilityState !== "hidden") start();
+       else stop();
+     }) : null;
+diff --git a/dist/index.es.js b/dist/index.es.js
+index 599fadc46778bb163cff5dc64ad8ab35efe1a960..b4ea0fdbe786a546e45a020011829cfdcafe20e6 100644
+--- a/dist/index.es.js
++++ b/dist/index.es.js
+@@ -713,8 +713,8 @@ function ThinkingOrb({
+     };
+     frame(performance.now() / 1e3 * effSpeed);
+     let visible = true;
+-    const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver(([entry]) => {
+-      visible = entry.isIntersecting;
++    const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver((entries) => {
++      visible = entries[entries.length - 1].isIntersecting;
+       if (visible && document.visibilityState !== "hidden") start();
+       else stop();
+     }) : null;

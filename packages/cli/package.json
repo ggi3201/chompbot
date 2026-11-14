@@ -1,0 +1,17 @@
+{
+  "name": "@chomp/cli",
+  "version": "0.1.0",
+  "description": "Command-line interface to the Chomp MCP toolset over HTTP.",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "chomp": "./cli.mjs"
+  },
+  "files": [
+    "cli.mjs",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node ./test.mjs"
+  }
+}

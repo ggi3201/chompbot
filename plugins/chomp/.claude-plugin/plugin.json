@@ -1,0 +1,18 @@
+{
+  "name": "chomp",
+  "version": "0.1.0",
+  "description": "Read the user's Chomp chats and memories, and message or start Chomp chats. Asks for the Chomp address and an outside-agent token when enabled.",
+  "userConfig": {
+    "url": {
+      "type": "string",
+      "title": "Chomp MCP URL",
+      "description": "Where Chomp answers outside agents, e.g. https://chomp.example.com/api/outside-mcp"
+    },
+    "token": {
+      "type": "string",
+      "title": "Chomp outside-agent token",
+      "description": "The value of an AGENT_TOKEN_<NAME> secret in Chomp's Settings. <NAME> is how your messages are labelled",
+      "sensitive": true
+    }
+  }
+}

@@ -1,0 +1,279 @@
+{
+ "success": true,
+ "errors": [],
+ "messages": [],
+ "result": {
+  "tunnel_id": "00000000-0000-4000-8000-000000000010",
+  "version": 57,
+  "config": {
+   "ingress": [
+    {
+     "service": "http://localhost:8644",
+     "hostname": "coop.home.example.com",
+     "originRequest": {}
+    },
+    {
+     "path": "/api/webhooks/receive/*",
+     "service": "http://localhost:3002",
+     "hostname": "webhooks.apps.example.net",
+     "originRequest": {
+      "httpHostHeader": "localhost"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "api.service.example.org",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "api.service.example.org"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "fitnessapi.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "fitnessapi.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "api.apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "api.apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "ideas.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "ideas.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "ideasapi.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "ideasapi.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "preview.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "preview.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "journeys.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "journeys.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "recipesapi.apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "recipesapi.apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "atelierapi.apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "atelierapi.apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "recipesapp.apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "recipesapp.apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "images.apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "images.apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "atelier.apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "atelier.apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "recipes.apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "recipes.apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "app.apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "app.apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "atelierapi-stg.apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "atelierapi-stg.apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "apps.example.org",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "apps.example.org"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "www.apps.example.org",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "www.apps.example.org"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "fitness.apps.example.net",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "fitness.apps.example.net"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "status-app.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "status-app.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "clock.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "clock.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "atelier.apps.example.org",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "atelier.apps.example.org"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "www.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "www.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "ly.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "ly.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "personal-site.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "personal-site.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "city-app.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "city-app.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "community-app.home.example.com",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "community-app.home.example.com"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "recipes.apps.example.org",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "recipes.apps.example.org"
+     }
+    },
+    {
+     "service": "https://localhost:443",
+     "hostname": "fitness.apps.example.org",
+     "originRequest": {
+      "noTLSVerify": true,
+      "originServerName": "fitness.apps.example.org"
+     }
+    },
+    {
+     "service": "http_status:404",
+     "originRequest": {}
+    }
+   ],
+   "warp-routing": {
+    "enabled": false
+   },
+   "__configuration_flags": {
+    "metrics": "127.0.0.1:20243",
+    "no-autoupdate": "true"
+   }
+  },
+  "source": "cloudflare",
+  "created_at": "2026-11-07T00:42:37.489480Z"
+ }
+}

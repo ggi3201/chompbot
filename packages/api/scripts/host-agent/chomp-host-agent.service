@@ -1,0 +1,13 @@
+[Unit]
+Description=Push host stats to Chomp monitoring
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# Root, so ss shows every process name and docker works. The script and env file must be root-owned.
+ExecStart=/opt/chomp-host-agent/linux.sh
+TimeoutStartSec=30
+Nice=10
+NoNewPrivileges=true
+PrivateTmp=true

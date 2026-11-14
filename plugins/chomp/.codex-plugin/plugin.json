@@ -1,0 +1,13 @@
+{
+  "name": "chomp",
+  "version": "0.1.0",
+  "description": "How to talk to Chomp. Add the Chomp MCP server first: an HTTP server at <Chomp>/api/outside-mcp with an AGENT_TOKEN_<NAME> bearer token.",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Chomp",
+    "shortDescription": "Talk to your Chomp",
+    "longDescription": "Read your Chomp chats and memories, ask a chat's agent something, or hand Chomp a task in a new chat.",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"]
+  }
+}

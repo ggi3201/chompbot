@@ -1,0 +1,47 @@
+{
+  "name": "@chomp/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@chomp/shared": "workspace:*",
+    "@fontsource-variable/newsreader": "^5.3.0",
+    "@xterm/addon-clipboard": "0.2.0",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/addon-unicode11": "0.9.0",
+    "@xterm/addon-web-links": "0.12.0",
+    "@xterm/addon-webgl": "0.19.0",
+    "@xterm/xterm": "6.0.0",
+    "lucide-react": "^0.575.0",
+    "motion": "^12.43.0",
+    "prismjs": "^1.30.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.5",
+    "react-simple-code-editor": "^0.14.1",
+    "react-syntax-highlighter": "^16.1.2",
+    "remark-gfm": "^4.0.1",
+    "thinking-orbs": "^0.3.2",
+    "voice-glow": "^0.3.0",
+    "voice-ring": "^0.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/prismjs": "^1.26.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "@vitejs/plugin-react": "^4.7.0",
+    "tailwindcss": "^4.3.5",
+    "vite": "^6.4.6",
+    "vitest": "^4.1.12"
+  }
+}

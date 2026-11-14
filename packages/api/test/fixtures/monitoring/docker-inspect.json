@@ -1,0 +1,1470 @@
+[
+ {
+  "Id": "12293380ae70",
+  "Name": "/recipes_landing",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "recipes-landing:latest",
+   "Labels": {
+    "com.docker.compose.project": "recipes-landing"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "3000/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.14"
+    }
+   }
+  }
+ },
+ {
+  "Id": "d62a08c78f8b",
+  "Name": "/shop_landing",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "shop-landing:latest",
+   "Labels": {
+    "com.docker.compose.project": "shop-landing"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "3000/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.15"
+    }
+   }
+  }
+ },
+ {
+  "Id": "ecc0f444578d",
+  "Name": "/fitness_landing",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "fitness-landing:latest",
+   "Labels": {
+    "com.docker.compose.project": "fitness-landing"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "8080/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.17"
+    }
+   }
+  }
+ },
+ {
+  "Id": "9ee27076cea6",
+  "Name": "/fitness_api",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "fitness-api",
+   "Labels": {
+    "com.docker.compose.project": "shop-fitness"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "8080/tcp": null
+   },
+   "Networks": {
+    "shop-fitness_lift": {
+     "IPAddress": "172.28.0.3"
+    },
+    "proxy": {
+     "IPAddress": "172.18.0.3"
+    }
+   }
+  }
+ },
+ {
+  "Id": "acdd53b9f6ce",
+  "Name": "/menu-board-rooms",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-alpine",
+   "Labels": {
+    "com.docker.compose.project": "preview-server"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.24"
+    }
+   }
+  }
+ },
+ {
+  "Id": "216c1dc37c8c",
+  "Name": "/preview-server",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "nginx:alpine",
+   "Labels": {
+    "com.docker.compose.project": "preview-server"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "80/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.5"
+    }
+   }
+  }
+ },
+ {
+  "Id": "9d0abcb8e4d0",
+  "Name": "/atelier_api",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "atelier-atelier-api",
+   "Labels": {
+    "com.docker.compose.project": "atelier"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "8080/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "5125"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "5125"
+     }
+    ]
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.6"
+    },
+    "atelier_atelier-network": {
+     "IPAddress": "172.22.0.3"
+    }
+   }
+  }
+ },
+ {
+  "Id": "e58aa438fd29",
+  "Name": "/status-app_web",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "nginx:1.27-alpine",
+   "Labels": {
+    "com.docker.compose.project": "status-app"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "80/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.18"
+    },
+    "status-app_inner": {
+     "IPAddress": "172.27.0.3"
+    }
+   }
+  }
+ },
+ {
+  "Id": "1348eae00a5b",
+  "Name": "/status-app_relay",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-alpine",
+   "Labels": {
+    "com.docker.compose.project": "status-app"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "status-app_inner": {
+     "IPAddress": "172.27.0.2"
+    }
+   }
+  }
+ },
+ {
+  "Id": "1cecfc686fdd",
+  "Name": "/status-app_tiles",
+  "RestartCount": 0,
+  "State": {
+   "Status": "exited",
+   "Running": false,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-bookworm-slim",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "bridge": {
+     "IPAddress": ""
+    }
+   }
+  }
+ },
+ {
+  "Id": "6cbffbdf99cb",
+  "Name": "/community-app_showcase",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "nginx:1.27-alpine",
+   "Labels": {
+    "com.docker.compose.project": "community-app-showcase"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "80/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.23"
+    }
+   }
+  }
+ },
+ {
+  "Id": "c071028be80f",
+  "Name": "/atelier_db",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "postgres:17-alpine",
+   "Labels": {
+    "com.docker.compose.project": "atelier"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "5432/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "5434"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "5434"
+     }
+    ]
+   },
+   "Networks": {
+    "atelier_atelier-network": {
+     "IPAddress": "172.22.0.2"
+    }
+   }
+  }
+ },
+ {
+  "Id": "3f4b8323b0bd",
+  "Name": "/traefikproxy-traefik-1",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "traefik:latest",
+   "Labels": {
+    "com.docker.compose.project": "traefikproxy"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "443/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "443"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "443"
+     }
+    ],
+    "80/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "80"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "80"
+     }
+    ],
+    "8080/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "8081"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "8081"
+     }
+    ]
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.4"
+    }
+   }
+  }
+ },
+ {
+  "Id": "59160fef3b6a",
+  "Name": "/minio",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "minio/minio@sha256:0000000000000000000000000000000000000000000000000000000000000001",
+   "Labels": {
+    "com.docker.compose.project": "minio"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "9000/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.11"
+    }
+   }
+  }
+ },
+ {
+  "Id": "a841c4d4ef9f",
+  "Name": "/imgproxy",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "darthsim/imgproxy:v3",
+   "Labels": {
+    "com.docker.compose.project": "minio"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "8080/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.12"
+    }
+   }
+  }
+ },
+ {
+  "Id": "1cb6c30c5143",
+  "Name": "/status-app_bldg31",
+  "RestartCount": 0,
+  "State": {
+   "Status": "exited",
+   "Running": false,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-bookworm-slim",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "bridge": {
+     "IPAddress": ""
+    }
+   }
+  }
+ },
+ {
+  "Id": "b131fb4ccddb",
+  "Name": "/status-app_buildings",
+  "RestartCount": 0,
+  "State": {
+   "Status": "exited",
+   "Running": false,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-bookworm-slim",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "bridge": {
+     "IPAddress": ""
+    }
+   }
+  }
+ },
+ {
+  "Id": "591cd5ee039d",
+  "Name": "/status-app_furniture",
+  "RestartCount": 0,
+  "State": {
+   "Status": "exited",
+   "Running": false,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-bookworm-slim",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "bridge": {
+     "IPAddress": ""
+    }
+   }
+  }
+ },
+ {
+  "Id": "6e87ac0b478e",
+  "Name": "/status-app_lidar",
+  "RestartCount": 0,
+  "State": {
+   "Status": "exited",
+   "Running": false,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-bookworm-slim",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "bridge": {
+     "IPAddress": ""
+    }
+   }
+  }
+ },
+ {
+  "Id": "3a874fadbbde",
+  "Name": "/status-app_bld",
+  "RestartCount": 0,
+  "State": {
+   "Status": "exited",
+   "Running": false,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-bookworm-slim",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "bridge": {
+     "IPAddress": ""
+    }
+   }
+  }
+ },
+ {
+  "Id": "f1a2d9124460",
+  "Name": "/recipes_api",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "shop-recipes-recipes-api",
+   "Labels": {
+    "com.docker.compose.project": "shop-recipes"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "6000/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "5124"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "5124"
+     }
+    ]
+   },
+   "Networks": {
+    "shop-recipes_recipes-network": {
+     "IPAddress": "172.19.0.3"
+    },
+    "proxy": {
+     "IPAddress": "172.18.0.8"
+    }
+   }
+  }
+ },
+ {
+  "Id": "00c55c6a2098",
+  "Name": "/status-app_bld10",
+  "RestartCount": 0,
+  "State": {
+   "Status": "exited",
+   "Running": false,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-bookworm-slim",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "bridge": {
+     "IPAddress": ""
+    }
+   }
+  }
+ },
+ {
+  "Id": "37137c549cc0",
+  "Name": "/status-app_bldg",
+  "RestartCount": 0,
+  "State": {
+   "Status": "exited",
+   "Running": false,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-bookworm-slim",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "bridge": {
+     "IPAddress": ""
+    }
+   }
+  }
+ },
+ {
+  "Id": "f1a37130f049",
+  "Name": "/trails_web",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "nginx:1.27-alpine",
+   "Labels": {
+    "com.docker.compose.project": "trails"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "80/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.22"
+    }
+   }
+  }
+ },
+ {
+  "Id": "544aa95def7b",
+  "Name": "/status-app_paint",
+  "RestartCount": 0,
+  "State": {
+   "Status": "exited",
+   "Running": false,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "node:22-bookworm-slim",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {},
+   "Networks": {
+    "bridge": {
+     "IPAddress": ""
+    }
+   }
+  }
+ },
+ {
+  "Id": "9834a4720fef",
+  "Name": "/atelier_landing",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "atelier-landing:latest",
+   "Labels": {
+    "com.docker.compose.project": "atelier-landing"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "3000/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.13"
+    }
+   }
+  }
+ },
+ {
+  "Id": "f85b5a85d8d6",
+  "Name": "/links_web",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "nginx:1.27-alpine",
+   "Labels": {
+    "com.docker.compose.project": "ly"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "80/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.21"
+    }
+   }
+  }
+ },
+ {
+  "Id": "68129f889ac2",
+  "Name": "/home-sites_web",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "nginx:1.27-alpine",
+   "Labels": {
+    "com.docker.compose.project": "home-sites"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "80/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.20"
+    }
+   }
+  }
+ },
+ {
+  "Id": "3d28b7b934ed",
+  "Name": "/clock_web",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "nginx:1.27-alpine",
+   "Labels": {
+    "com.docker.compose.project": "clock"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "80/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.19"
+    }
+   }
+  }
+ },
+ {
+  "Id": "979bd0852f1a",
+  "Name": "/shop-app-app-1",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "shop-app-app",
+   "Labels": {
+    "com.docker.compose.project": "shop-app"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "80/tcp": null
+   },
+   "Networks": {
+    "shop-app_app-network": {
+     "IPAddress": "172.24.0.2"
+    },
+    "proxy": {
+     "IPAddress": "172.18.0.9"
+    }
+   }
+  }
+ },
+ {
+  "Id": "60e9bd6c2bf4",
+  "Name": "/atelier_api_stg",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "atelier-stg-atelier-api-stg",
+   "Labels": {
+    "com.docker.compose.project": "atelier-stg"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "8080/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "5126"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "5126"
+     }
+    ]
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.16"
+    },
+    "atelier-stg_atelier-network-stg": {
+     "IPAddress": "172.26.0.3"
+    }
+   }
+  }
+ },
+ {
+  "Id": "29adaf141f4b",
+  "Name": "/recipes_db",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "pgvector/pgvector:pg16",
+   "Labels": {
+    "com.docker.compose.project": "shop-recipes"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "5432/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "5433"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "5433"
+     }
+    ]
+   },
+   "Networks": {
+    "shop-recipes_recipes-network": {
+     "IPAddress": "172.19.0.2"
+    }
+   }
+  }
+ },
+ {
+  "Id": "e280ffc887e9",
+  "Name": "/atelier_db_stg",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "postgres:17-alpine",
+   "Labels": {
+    "com.docker.compose.project": "atelier-stg"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "5432/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "5435"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "5435"
+     }
+    ]
+   },
+   "Networks": {
+    "atelier-stg_atelier-network-stg": {
+     "IPAddress": "172.26.0.2"
+    }
+   }
+  }
+ },
+ {
+  "Id": "7fc064eb26b3",
+  "Name": "/travel-map",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "travel-map-travel-map",
+   "Labels": {
+    "com.docker.compose.project": "travel-map"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "3000/tcp": null
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.2"
+    }
+   }
+  }
+ },
+ {
+  "Id": "5633c16dc189",
+  "Name": "/uptime-kuma",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "louislam/uptime-kuma:1",
+   "Labels": {
+    "com.docker.compose.project": "uptime-kuma"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "3001/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "3001"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "3001"
+     }
+    ]
+   },
+   "Networks": {
+    "proxy": {
+     "IPAddress": "172.18.0.10"
+    },
+    "uptime-kuma_default": {
+     "IPAddress": "172.31.0.2"
+    }
+   }
+  }
+ },
+ {
+  "Id": "469c37858a19",
+  "Name": "/rocket-backend-orbitapi-1",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "orbitapi",
+   "Labels": {
+    "com.docker.compose.project": "rocket-backend"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "5000/tcp": null
+   },
+   "Networks": {
+    "rocket-backend_orbit-network": {
+     "IPAddress": "172.21.0.3"
+    },
+    "proxy": {
+     "IPAddress": "172.18.0.7"
+    }
+   }
+  }
+ },
+ {
+  "Id": "5ed193ac4503",
+  "Name": "/langfuse-web",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "langfuse/langfuse:3",
+   "Labels": {
+    "com.docker.compose.project": "langfuse"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "3000/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "3010"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "3010"
+     }
+    ]
+   },
+   "Networks": {
+    "langfuse": {
+     "IPAddress": "172.29.0.2"
+    }
+   }
+  }
+ },
+ {
+  "Id": "e45831efe763",
+  "Name": "/langfuse-worker",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "langfuse/langfuse-worker:3",
+   "Labels": {
+    "com.docker.compose.project": "langfuse"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "3030/tcp": null
+   },
+   "Networks": {
+    "langfuse": {
+     "IPAddress": "172.29.0.7"
+    }
+   }
+  }
+ },
+ {
+  "Id": "b81e6c1a058c",
+  "Name": "/langfuse-postgres",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "postgres:17",
+   "Labels": {
+    "com.docker.compose.project": "langfuse"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "5432/tcp": null
+   },
+   "Networks": {
+    "langfuse": {
+     "IPAddress": "172.29.0.6"
+    }
+   }
+  }
+ },
+ {
+  "Id": "783b771c9763",
+  "Name": "/langfuse-clickhouse",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "clickhouse/clickhouse-server:24.3",
+   "Labels": {
+    "com.docker.compose.project": "langfuse"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "8123/tcp": null,
+    "9000/tcp": null,
+    "9009/tcp": null
+   },
+   "Networks": {
+    "langfuse": {
+     "IPAddress": "172.29.0.4"
+    }
+   }
+  }
+ },
+ {
+  "Id": "512bb7243a7f",
+  "Name": "/langfuse-minio",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "minio/minio",
+   "Labels": {
+    "com.docker.compose.project": "langfuse"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "9000/tcp": null
+   },
+   "Networks": {
+    "langfuse": {
+     "IPAddress": "172.29.0.5"
+    }
+   }
+  }
+ },
+ {
+  "Id": "8e4ae12952c7",
+  "Name": "/fitness_db",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "postgres:17-alpine@sha256:0000000000000000000000000000000000000000000000000000000000000002",
+   "Labels": {
+    "com.docker.compose.project": "shop-fitness"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "5432/tcp": null
+   },
+   "Networks": {
+    "shop-fitness_lift": {
+     "IPAddress": "172.28.0.2"
+    }
+   }
+  }
+ },
+ {
+  "Id": "f8b30735e4f7",
+  "Name": "/redis",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "redis:alpine",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "6379/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "6379"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "6379"
+     }
+    ]
+   },
+   "Networks": {
+    "bridge": {
+     "IPAddress": "172.17.0.4"
+    },
+    "langfuse": {
+     "IPAddress": "172.29.0.3"
+    }
+   }
+  }
+ },
+ {
+  "Id": "64d9eb840520",
+  "Name": "/dashy",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false,
+   "Health": {
+    "Status": "healthy"
+   }
+  },
+  "Config": {
+   "Image": "lissy93/dashy:latest",
+   "Labels": {}
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "8080/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "9090"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "9090"
+     }
+    ]
+   },
+   "Networks": {
+    "bridge": {
+     "IPAddress": "172.17.0.3"
+    }
+   }
+  }
+ },
+ {
+  "Id": "2273ecfb83cb",
+  "Name": "/searxng",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "searxng/searxng:latest",
+   "Labels": {
+    "com.docker.compose.project": "searxng"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "8080/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "8888"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "8888"
+     }
+    ]
+   },
+   "Networks": {
+    "searxng_default": {
+     "IPAddress": "172.25.0.2"
+    }
+   }
+  }
+ },
+ {
+  "Id": "abe269cc6490",
+  "Name": "/rocket-backend-postgres-db-pf-1",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "postgres:17",
+   "Labels": {
+    "com.docker.compose.project": "rocket-backend"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "5432/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "5632"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "5632"
+     }
+    ]
+   },
+   "Networks": {
+    "rocket-backend_orbit-network": {
+     "IPAddress": "172.21.0.2"
+    }
+   }
+  }
+ },
+ {
+  "Id": "e17ab64a5cb4",
+  "Name": "/portainer",
+  "RestartCount": 0,
+  "State": {
+   "Status": "running",
+   "Running": true,
+   "Restarting": false,
+   "OOMKilled": false
+  },
+  "Config": {
+   "Image": "portainer/portainer-ce:latest",
+   "Labels": {
+    "com.docker.compose.project": "shop-monitoring"
+   }
+  },
+  "NetworkSettings": {
+   "Ports": {
+    "8000/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "8000"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "8000"
+     }
+    ],
+    "9000/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "9000"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "9000"
+     }
+    ],
+    "9443/tcp": [
+     {
+      "HostIp": "0.0.0.0",
+      "HostPort": "9443"
+     },
+     {
+      "HostIp": "::",
+      "HostPort": "9443"
+     }
+    ]
+   },
+   "Networks": {
+    "shop-monitoring_default": {
+     "IPAddress": "172.23.0.2"
+    }
+   }
+  }
+ }
+]

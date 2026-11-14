@@ -1,0 +1,10 @@
+fl=83f165
+h=cloudflare.com
+ip=203.0.113.7
+ts=1794181620.123
+visit_scheme=https
+uag=curl/8.5.0
+colo=AMS
+http=http/2
+loc=NL
+tls=TLSv1.3

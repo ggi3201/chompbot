@@ -1,0 +1,14 @@
+{
+ "BackendState": "Running",
+ "TailscaleIPs": [
+  "100.64.0.42",
+  "fd7a:115c:a1e0::42"
+ ],
+ "Self": {
+  "HostName": "test-server",
+  "TailscaleIPs": [
+   "100.64.0.42",
+   "fd7a:115c:a1e0::42"
+  ]
+ }
+}

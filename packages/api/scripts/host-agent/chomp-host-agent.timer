@@ -1,0 +1,10 @@
+[Unit]
+Description=Push host stats to Chomp every minute
+
+[Timer]
+OnCalendar=minutely
+AccuracySec=5s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

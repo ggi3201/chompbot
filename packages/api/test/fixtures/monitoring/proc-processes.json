@@ -1,0 +1,98 @@
+{
+ "2226": {
+  "cgroup": "0::/system.slice/system-code\\x2dserver.slice/code-server@testuser.service",
+  "cwd": "/"
+ },
+ "404645": {
+  "cgroup": "0::/system.slice/travel-app.service",
+  "cwd": "/home/testuser/travel-app/releases/20261023T141627Z-0000000000000000000000000000000000000001"
+ },
+ "666190": {
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/collector.service",
+  "cwd": "/home/testuser/code/atelier/tools/collector"
+ },
+ "884228": {
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/site-index.service",
+  "cwd": "/home/testuser/code/site-index"
+ },
+ "1105472": {
+  "cgroup": "0::/system.slice/invoices-web.service",
+  "cwd": "/home/testuser/code/invoices-web"
+ },
+ "1195874": {
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/listings.service",
+  "cwd": "/home/testuser/code/listings"
+ },
+ "1290514": {
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/bookmarks.service",
+  "cwd": "/home/testuser/code/bookmarks"
+ },
+ "1883091": {
+  "cgroup": "0::/user.slice/user-1000.slice/session-69755.scope",
+  "cwd": "/home/testuser/code/bookmarks/.claude/worktrees/search-tags-cleanup"
+ },
+ "2069880": {
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/menu-board-dev-9d07.service",
+  "cwd": "/home/testuser/chomp-work/worktrees/menu-board-9d074a6a"
+ },
+ "2353982": {
+  "cgroup": "0::/system.slice/courier-webui.service",
+  "cwd": "/home/testuser/.courier/courier-agent"
+ },
+ "2482392": {
+  "cgroup": "0::/user.slice/user-1000.slice/session-59429.scope",
+  "cwd": "/home/testuser/code/bookmarks/.claude/worktrees/open-source-repo-sharing-45b653"
+ },
+ "2750525": {
+  "cgroup": "0::/user.slice/user-1000.slice/session-59429.scope",
+  "cwd": "/home/testuser/code/bookmarks/.claude/worktrees/open-source-repo-sharing-45b653"
+ },
+ "2758197": {
+  "cgroup": "0::/system.slice/chomp.service",
+  "cwd": "/tmp/preview-smoke"
+ },
+ "2891158": {
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/pv-files9.service",
+  "cwd": "/tmp/chomp-verify-ui/packages/api"
+ },
+ "2927876": {
+  "cgroup": "",
+  "cwd": null
+ },
+ "3021873": {
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/courier-gateway.service",
+  "cwd": "/home/testuser/.courier"
+ },
+ "3021993": {
+  "cgroup": "0::/system.slice/courier-serve.service",
+  "cwd": "/home/testuser/.courier"
+ },
+ "3040577": {
+  "cgroup": "0::/user.slice/user-1000.slice/session-59429.scope",
+  "cwd": "/home/testuser/code/bookmarks/.claude/worktrees/open-source-repo-sharing-45b653"
+ },
+ "3081389": {
+  "cgroup": "0::/system.slice/relay-board.service",
+  "cwd": "/home/testuser/queue-app/releases/20260901T161952Z-0000000000000000000000000000000000000002"
+ },
+ "3841234": {
+  "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/fa-preview.service",
+  "cwd": "/home/testuser/chomp-work/worktrees/menu-board-e89425a9"
+ },
+ "3898778": {
+  "cgroup": "0::/system.slice/chomp.service",
+  "cwd": "/home/testuser/chomp-work/worktrees/chomp-b1b57250"
+ },
+ "3898797": {
+  "cgroup": "0::/system.slice/chomp.service",
+  "cwd": "/home/testuser/chomp-work/worktrees/chomp-b1b57250"
+ },
+ "4040418": {
+  "cgroup": "0::/system.slice/portfolio-web.service",
+  "cwd": "/home/testuser/code/portfolio-web"
+ },
+ "4054131": {
+  "cgroup": "0::/system.slice/social-posts.service",
+  "cwd": "/home/testuser/code/social-posts"
+ }
+}

@@ -1,0 +1,6 @@
+# Development overlay
+# Run infra: docker compose up -d
+# Run app locally: pnpm dev
+#
+# For full containerized dev:
+# docker compose -f docker-compose.yml -f docker-compose.dev.yml up

@@ -1,0 +1,9 @@
+// Local build configuration. Do not put credentials in the app bundle.
+// Hostname only: omit https:// and any path. Leave empty to enter it at sign-in.
+CHOMP_DEFAULT_SERVER_HOST = chomp.example.com
+
+// A bundle id registered to your Apple Developer team.
+CHOMP_BUNDLE_ID = com.yourname.chomp
+
+// Your Apple Developer team ID, used when signing device or archive builds.
+DEVELOPMENT_TEAM =

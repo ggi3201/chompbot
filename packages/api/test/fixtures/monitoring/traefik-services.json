@@ -1,0 +1,681 @@
+[
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://100.64.0.42:4130"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "bookmarks@file"
+  ],
+  "name": "bookmarks@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "status": "enabled",
+  "usedBy": [
+   "api@internal"
+  ],
+  "name": "api@internal",
+  "provider": "internal"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://10.0.2.168:8085"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "shop-api@file"
+  ],
+  "name": "shop-api@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.15:3000"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "shop-landing@docker"
+  ],
+  "name": "shop-landing@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.9:80"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "shop@docker"
+  ],
+  "name": "shop@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://10.0.2.248:3002"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "chomp-tailscale@file"
+  ],
+  "name": "chomp-tailscale@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://10.0.2.248:4131"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "collector@file"
+  ],
+  "name": "collector@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "status": "enabled",
+  "usedBy": [
+   "dashboard@internal"
+  ],
+  "name": "dashboard@internal",
+  "provider": "internal"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://10.0.2.248:4132"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "listings@file"
+  ],
+  "name": "listings@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.14:3000"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "recipes-landing@docker"
+  ],
+  "name": "recipes-landing@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.8:6000"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "recipesapi@docker",
+   "recipesapp@docker"
+  ],
+  "name": "recipesapi@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.11:9000"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "recipesimages@docker"
+  ],
+  "name": "recipesimages@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.12:8080"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "recipesresize@docker"
+  ],
+  "name": "recipesresize@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.23:80"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "community-app-showcase@docker"
+  ],
+  "name": "community-app-showcase@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.22:80"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "trails-web@docker"
+  ],
+  "name": "trails-web@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.17:8080"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "fitness-landing@docker"
+  ],
+  "name": "fitness-landing@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.3:8080"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "fitnessapi@docker"
+  ],
+  "name": "fitnessapi@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://10.0.2.248:4124"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "social-posts@file"
+  ],
+  "name": "social-posts@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.20:80"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "home-sites-web@docker"
+  ],
+  "name": "home-sites-web@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.21:80"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "ly-web@docker"
+  ],
+  "name": "ly-web@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "status": "enabled",
+  "usedBy": [
+   "web-to-websecure@internal"
+  ],
+  "name": "noop@internal",
+  "provider": "internal"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.7:6000"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "rocket@docker"
+  ],
+  "name": "rocket@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://10.0.2.248:4123"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "portfolio-web@file"
+  ],
+  "name": "portfolio-web@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.5:80"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "menumap@docker",
+   "index@docker",
+   "preview@docker"
+  ],
+  "name": "preview@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://100.64.0.42:4125"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "invoices-web@file"
+  ],
+  "name": "invoices-web@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://10.0.2.248:4128"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "relay-board@file"
+  ],
+  "name": "relay-board@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://10.0.2.248:4127"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "site-index@file"
+  ],
+  "name": "site-index@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.18:80"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "city-app@docker",
+   "status-app@docker"
+  ],
+  "name": "status-app@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.13:3000"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "atelier-landing@docker"
+  ],
+  "name": "atelier-landing@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.6:8080"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "atelierapi@docker"
+  ],
+  "name": "atelierapi@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.16:8080"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "atelierapistg@docker"
+  ],
+  "name": "atelierapistg@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.2:3000"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "travel-globe@docker"
+  ],
+  "name": "travel-globe@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://10.0.2.248:4126"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "travel-app@file"
+  ],
+  "name": "travel-app@file",
+  "provider": "file",
+  "type": "loadbalancer"
+ },
+ {
+  "loadBalancer": {
+   "servers": [
+    {
+     "url": "http://172.18.0.19:80"
+    }
+   ],
+   "strategy": "wrr",
+   "passHostHeader": true,
+   "responseForwarding": {
+    "flushInterval": "100ms"
+   }
+  },
+  "status": "enabled",
+  "usedBy": [
+   "clock-web@docker"
+  ],
+  "name": "clock-web@docker",
+  "provider": "docker",
+  "type": "loadbalancer"
+ }
+]

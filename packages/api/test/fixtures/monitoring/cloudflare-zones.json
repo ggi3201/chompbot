@@ -1,0 +1,14 @@
+{
+ "success": true,
+ "errors": [],
+ "result": [
+  {
+   "id": "zone-home",
+   "name": "home.example.com"
+  },
+  {
+   "id": "zone-apps",
+   "name": "apps.example.net"
+  }
+ ]
+}

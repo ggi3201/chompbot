@@ -1,0 +1,1 @@
+ALTER TABLE `proactive_rules` ADD `run_at` text;

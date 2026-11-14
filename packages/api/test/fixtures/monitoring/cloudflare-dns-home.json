@@ -1,0 +1,219 @@
+{
+ "success": true,
+ "errors": [],
+ "messages": [],
+ "result": [
+  {
+   "id": "x",
+   "name": "bookmarks.home.example.com",
+   "type": "A",
+   "content": "100.64.0.42",
+   "proxied": false,
+   "ttl": 300
+  },
+  {
+   "id": "x",
+   "name": "board.home.example.com",
+   "type": "A",
+   "content": "100.64.0.42",
+   "proxied": false,
+   "ttl": 300
+  },
+  {
+   "id": "x",
+   "name": "listings.home.example.com",
+   "type": "A",
+   "content": "100.64.0.42",
+   "proxied": false,
+   "ttl": 300
+  },
+  {
+   "id": "x",
+   "name": "menumap.home.example.com",
+   "type": "A",
+   "content": "100.64.0.42",
+   "proxied": false,
+   "ttl": 300
+  },
+  {
+   "id": "x",
+   "name": "globe.home.example.com",
+   "type": "A",
+   "content": "100.64.0.42",
+   "proxied": false,
+   "ttl": 300
+  },
+  {
+   "id": "x",
+   "name": "index.home.example.com",
+   "type": "A",
+   "content": "100.64.0.42",
+   "proxied": false,
+   "ttl": 300
+  },
+  {
+   "id": "x",
+   "name": "social.home.example.com",
+   "type": "A",
+   "content": "10.0.2.248",
+   "proxied": false,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "looks.home.example.com",
+   "type": "A",
+   "content": "100.64.0.42",
+   "proxied": false,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "portfolio.home.example.com",
+   "type": "A",
+   "content": "10.0.2.248",
+   "proxied": false,
+   "ttl": 120
+  },
+  {
+   "id": "x",
+   "name": "invoices.home.example.com",
+   "type": "A",
+   "content": "100.64.0.42",
+   "proxied": false,
+   "ttl": 120
+  },
+  {
+   "id": "x",
+   "name": "community-app.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "notes-api.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "fitnessapi.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "ly.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "city-app.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "onebox.home.example.com",
+   "type": "CNAME",
+   "content": "project.example.org",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "preview.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "personal-site.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "status-app.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "ideasapi.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "ideas.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "journeys.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "clock.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "www.home.example.com",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "direct.home.example.com",
+   "type": "A",
+   "content": "203.0.113.7",
+   "proxied": false,
+   "ttl": 300
+  }
+ ],
+ "result_info": {
+  "page": 1,
+  "per_page": 500
+ }
+}

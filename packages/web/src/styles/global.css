@@ -1,0 +1,360 @@
+/* Graphite — a home server at night: neutral surfaces, one ember accent */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Surfaces — one graphite ramp */
+  --color-surface: #141415;
+  --color-surface-alt: #0f0f10;
+  --color-raised: #232325;
+
+  /* Cards (the old glass names stay so existing classes keep working) */
+  --color-glass: #19191b;
+  --color-glass-hover: #1e1e20;
+  --color-glass-border: rgba(237,237,237,0.08);
+  --color-glass-border-hover: rgba(237,237,237,0.14);
+
+  /* Accent — ember, for the primary action, selection and live state only */
+  --color-accent: #f2a33a;
+  --color-accent-ink: #f5b55e;
+  --color-on-accent: #1a1206;
+
+  /* Former aurora hues, folded into neutrals so purple states become surface steps */
+  --color-violet: #d4d4d8;
+  --color-violet-soft: #ededed;
+  --color-purple: #d4d4d8;
+  --color-purple-soft: #ededed;
+
+  /* Category hues, toned down to sit inside the ramp */
+  --color-cyan: #6cb6c8;
+  --color-cyan-soft: #9ccfdb;
+  --color-pink: #d68ba8;
+  --color-pink-soft: #e5b3c6;
+  --color-emerald: #4cc38a;
+  --color-emerald-soft: #8fd9b4;
+  --color-blue: #7aa5e0;
+
+  /* Legacy names, now the accent */
+  --color-amber: #f5b55e;
+  --color-amber-light: #f5b55e;
+  --color-amber-dim: #b8792a;
+  --color-amber-glow: rgba(242,163,58,0.12);
+
+  /* Text — three roles */
+  --color-text-primary: #ededed;
+  --color-text-secondary: #a1a1a6;
+  --color-text-muted: #85858b;
+
+  /* Semantic */
+  --color-border: rgba(237,237,237,0.08);
+  --color-error: #e5484d;
+  --color-success: #4cc38a;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+
+  /* Depth — surface steps and hairlines, shadows only for floating things */
+  --shadow-glass: 0 0 #0000;
+  --shadow-glass-hover: 0 0 #0000;
+  --shadow-modal: 0 24px 64px rgba(0,0,0,0.5);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-zero-g: zero-g 17s ease-in-out infinite;
+  --animate-glyph-in: glyph-in 520ms var(--ease-out) both;
+  --animate-agent-mark: agent-mark 700ms var(--ease-out) both;
+  --animate-agent-label: agent-label 1800ms linear both;
+
+  /* Fonts */
+  --font-heading: 'Geist', system-ui, sans-serif;
+  --font-body: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --font-paper: 'Newsreader Variable', Georgia, serif;
+
+  /* The morning paper: newsprint, ink and one signal red. */
+  --color-paper: #f4f0e6;
+  --color-paper-raised: #ebe5d7;
+  --color-ink: #1b1813;
+  --color-ink-soft: #544c41;
+  --color-ink-muted: #6f675b;
+  --color-rule: rgb(27 24 19 / 16%);
+  --color-signal: #b8141f;
+}
+
+/* Safe area inset variables (requires viewport-fit=cover in meta) */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  /* Where the page starts below the fixed top bar a phone shows (Layout.tsx, same breakpoint as useIsMobile). */
+  --chrome-top: 0px;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --chrome-top: calc(3rem + var(--safe-top));
+  }
+}
+
+/* The keyboard covers the home indicator, so nothing needs to clear it. */
+:root[data-keyboard] {
+  --safe-bottom: 0px;
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.5;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 500;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(237,237,237,0.12);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(237,237,237,0.2);
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(242,163,58,0.28);
+    color: #fff;
+  }
+
+  /* Focus */
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: rgba(237,237,237,0.24) !important;
+  }
+  :focus-visible {
+    outline: 2px solid rgba(242,163,58,0.6);
+    outline-offset: 2px;
+  }
+  input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: none;
+  }
+
+  /* Caret */
+  input, textarea {
+    caret-color: var(--color-accent);
+  }
+
+  /* Code in markdown */
+  code {
+    font-family: var(--font-mono);
+    background: rgba(237,237,237,0.06);
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    font-size: 0.88em;
+  }
+
+  pre {
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+  }
+
+  /* ─── Keyframes ─── */
+
+  /* Birthright: everything floats, and nothing floats in step */
+  @keyframes zero-g {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    30% { transform: translate3d(3px, -6px, 0) rotate(0.22deg); }
+    65% { transform: translate3d(-3px, 4px, 0) rotate(-0.18deg); }
+  }
+
+  @keyframes glyph-in {
+    from { opacity: 0; filter: blur(3px); }
+    to { opacity: 1; filter: blur(0); }
+  }
+
+  /* The preview: where the agent just clicked, and what it did */
+  @keyframes agent-mark {
+    from { opacity: 1; transform: translate(-50%, -50%) scale(0.4); }
+    to { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+  }
+
+  @keyframes agent-label {
+    0%, 75% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes cursor-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  @keyframes shimmer-dark {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+  }
+
+  @keyframes sketch-draw {
+    from { stroke-dashoffset: 1; fill-opacity: 0; }
+    80% { fill-opacity: 0; }
+    to { stroke-dashoffset: 0; fill-opacity: 1; }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Utility classes */
+  .typing-cursor::after {
+    content: '\2588';
+    animation: cursor-blink 1s step-end infinite;
+    color: var(--color-accent);
+    margin-left: 2px;
+  }
+
+  /* Select dropdowns */
+  select {
+    background: var(--color-glass);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-body);
+    border-radius: 8px;
+  }
+
+  select option {
+    background: #19191b;
+    color: var(--color-text-primary);
+  }
+
+  /* Dialog backdrop */
+  dialog::backdrop {
+    background: rgba(10,10,11,0.72);
+  }
+
+  /* Fullscreen dialog on mobile — override browser defaults */
+  @media (max-width: 767px) {
+    dialog[open] {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
+
+  /* Checkbox accent */
+  input[type="checkbox"] {
+    accent-color: var(--color-purple);
+  }
+
+  /* Links */
+  a {
+    color: var(--color-accent-ink);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-accent);
+  }
+
+  /* Button base */
+  button {
+    transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), color 150ms var(--ease-out), transform 120ms var(--ease-out);
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+  body {
+    font-size: 15px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  /* Prevent iOS Safari from zooming in when focusing inputs (requires font-size >= 16px) */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Native select with our own chevron: the OS one hugs the right edge. Unlayered so it beats px-* utilities. */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2385858b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+/* Syntax highlighting for CodeEditor (Prism token classes), drawn from the app palette. */
+.code-editor .token.comment,
+.code-editor .token.prolog,
+.code-editor .token.doctype,
+.code-editor .token.cdata { color: var(--color-text-muted); font-style: italic; }
+.code-editor .token.punctuation,
+.code-editor .token.operator { color: var(--color-text-muted); }
+.code-editor .token.property,
+.code-editor .token.attr-name { color: var(--color-amber); }
+.code-editor .token.tag,
+.code-editor .token.keyword,
+.code-editor .token.selector,
+.code-editor .token.null { color: var(--color-pink); }
+.code-editor .token.string,
+.code-editor .token.attr-value,
+.code-editor .token.char { color: var(--color-emerald); }
+.code-editor .token.number,
+.code-editor .token.boolean,
+.code-editor .token.constant,
+.code-editor .token.unit { color: var(--color-blue); }
+.code-editor .token.function,
+.code-editor .token.class-name,
+.code-editor .token.builtin { color: var(--color-cyan); }
+/* JSON keys are properties; keep them readable rather than amber when they are the bulk of the text. */
+.code-editor.lang-json .token.property { color: var(--color-text-primary); }

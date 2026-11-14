@@ -1,0 +1,123 @@
+{
+ "success": true,
+ "errors": [],
+ "messages": [],
+ "result": [
+  {
+   "id": "x",
+   "name": "api.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "app.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "00000000000000000000000000000003.fitness.apps.example.net",
+   "type": "CNAME",
+   "content": "verify.bing.com",
+   "proxied": false,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "00000000000000000000000000000004.recipes.apps.example.net",
+   "type": "CNAME",
+   "content": "verify.bing.com",
+   "proxied": false,
+   "ttl": 300
+  },
+  {
+   "id": "x",
+   "name": "recipesapi.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "recipesapp.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "recipes.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "images.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "fitness.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "atelierapi.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "atelierapi-stg.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "atelier.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  },
+  {
+   "id": "x",
+   "name": "webhooks.apps.example.net",
+   "type": "CNAME",
+   "content": "00000000-0000-4000-8000-000000000010.cfargotunnel.com",
+   "proxied": true,
+   "ttl": 1
+  }
+ ],
+ "result_info": {
+  "page": 1,
+  "per_page": 500
+ }
+}

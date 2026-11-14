@@ -1,0 +1,94 @@
+State  Recv-Q Send-Q                          Local Address:Port  Peer Address:PortProcess
+LISTEN 0      4096                                  0.0.0.0:3010       0.0.0.0:*
+LISTEN 0      511                                   0.0.0.0:3002       0.0.0.0:*    users:(("MainThread",pid=2927876,fd=25))
+LISTEN 0      4096                                  0.0.0.0:3001       0.0.0.0:*
+LISTEN 0      4096                            127.0.0.53%lo:53         0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:80         0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:22         0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:443        0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:8081       0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:8000       0.0.0.0:*
+LISTEN 0      4096                100.64.0.42%tailscale0:44599      0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:6379       0.0.0.0:*
+LISTEN 0      4096                100.64.0.42%tailscale0:44141      0.0.0.0:*
+LISTEN 0      4096                100.64.0.42%tailscale0:44150      0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:5632       0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:5126       0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:5125       0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:5124       0.0.0.0:*
+LISTEN 0      4096                100.64.0.42%tailscale0:8451       0.0.0.0:*
+LISTEN 0      4096                100.64.0.42%tailscale0:8444       0.0.0.0:*
+LISTEN 0      4096                100.64.0.42%tailscale0:8445       0.0.0.0:*
+LISTEN 0      4096                100.64.0.42%tailscale0:8446       0.0.0.0:*
+LISTEN 0      4096                100.64.0.42%tailscale0:8447       0.0.0.0:*
+LISTEN 0      4096                100.64.0.42%tailscale0:8442       0.0.0.0:*
+LISTEN 0      4096                100.64.0.42%tailscale0:8443       0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:5435       0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:5434       0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:5433       0.0.0.0:*
+LISTEN 0      10                                  127.0.0.1:43205      0.0.0.0:*    users:(("chrome",pid=3898797,fd=76))
+LISTEN 0      511                                   0.0.0.0:4127       0.0.0.0:*    users:(("next-server (v1",pid=884228,fd=21))
+LISTEN 0      511                                   0.0.0.0:4131       0.0.0.0:*    users:(("next-server (v1",pid=666190,fd=21))
+LISTEN 0      511                                   0.0.0.0:4128       0.0.0.0:*    users:(("next-server (v1",pid=3081389,fd=21))
+LISTEN 0      511                                   0.0.0.0:4132       0.0.0.0:*    users:(("next-server (v1",pid=1195874,fd=21))
+LISTEN 0      5                                     0.0.0.0:4599       0.0.0.0:*    users:(("python3",pid=2758197,fd=3))
+LISTEN 0      4096                                127.0.0.1:38161      0.0.0.0:*    users:(("agent-browser-l",pid=3898778,fd=9))
+LISTEN 0      511                                 127.0.0.1:4179       0.0.0.0:*    users:(("next-server (v1",pid=2750525,fd=21))
+LISTEN 0      511                                 127.0.0.1:4189       0.0.0.0:*    users:(("next-server (v1",pid=3040577,fd=21))
+LISTEN 0      511                                 127.0.0.1:4199       0.0.0.0:*    users:(("next-server (v1",pid=1883091,fd=21))
+LISTEN 0      511                                 127.0.0.1:4150       0.0.0.0:*    users:(("node",pid=3841234,fd=21))
+LISTEN 0      511                                 127.0.0.1:4141       0.0.0.0:*    users:(("node",pid=2069880,fd=21))
+LISTEN 0      4096                                  0.0.0.0:9443       0.0.0.0:*
+LISTEN 0      511                                 127.0.0.1:8080       0.0.0.0:*    users:(("node",pid=2226,fd=22))
+LISTEN 0      511                            100.64.0.42:4130       0.0.0.0:*    users:(("next-server (v1",pid=1290514,fd=21))
+LISTEN 0      511                            100.64.0.42:4125       0.0.0.0:*    users:(("next-server (v1",pid=1105472,fd=21))
+LISTEN 0      4096                                  0.0.0.0:8888       0.0.0.0:*
+LISTEN 0      64                                    0.0.0.0:8787       0.0.0.0:*    users:(("python",pid=2353982,fd=6))
+LISTEN 0      2048                                  0.0.0.0:9119       0.0.0.0:*    users:(("courier",pid=3021993,fd=7))
+LISTEN 0      4096                                  0.0.0.0:9090       0.0.0.0:*
+LISTEN 0      4096                                  0.0.0.0:9000       0.0.0.0:*
+LISTEN 0      128                                   0.0.0.0:8644       0.0.0.0:*    users:(("courier",pid=3021873,fd=25))
+LISTEN 0      511                                 127.0.0.1:6799       0.0.0.0:*    users:(("MainThread",pid=2891158,fd=25))
+LISTEN 0      511                                 127.0.0.1:6798       0.0.0.0:*    users:(("MainThread",pid=2891158,fd=32))
+LISTEN 0      4096                100.64.0.42%tailscale0:51810      0.0.0.0:*
+LISTEN 0      4096                                127.0.0.1:631        0.0.0.0:*
+LISTEN 0      4096                                127.0.0.1:20241      0.0.0.0:*
+LISTEN 0      4096                                127.0.0.1:20243      0.0.0.0:*
+LISTEN 0      4096                               127.0.0.54:53         0.0.0.0:*
+LISTEN 0      4096                                     [::]:3010          [::]:*
+LISTEN 0      4096                                     [::]:3001          [::]:*
+LISTEN 0      4096                                     [::]:80            [::]:*
+LISTEN 0      4096                                     [::]:22            [::]:*
+LISTEN 0      4096                                     [::]:443           [::]:*
+LISTEN 0      4096                                     [::]:8081          [::]:*
+LISTEN 0      4096                                     [::]:8000          [::]:*
+LISTEN 0      4096                                     [::]:6379          [::]:*
+LISTEN 0      4096                                     [::]:5632          [::]:*
+LISTEN 0      4096                                     [::]:5126          [::]:*
+LISTEN 0      4096                                     [::]:5125          [::]:*
+LISTEN 0      4096                                     [::]:5124          [::]:*
+LISTEN 0      4096                                     [::]:5435          [::]:*
+LISTEN 0      4096                                     [::]:5434          [::]:*
+LISTEN 0      4096                                     [::]:5433          [::]:*
+LISTEN 0      511                                         *:4999             *:*    users:(("next-server (v1",pid=2482392,fd=21))
+LISTEN 0      511                                         *:4123             *:*    users:(("next-server (v1",pid=4040418,fd=21))
+LISTEN 0      511                                         *:4126             *:*    users:(("next-server (v1",pid=404645,fd=21))
+LISTEN 0      511                                         *:4124             *:*    users:(("next-server (v1",pid=4054131,fd=21))
+LISTEN 0      4096                                        *:11434            *:*
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:8443          [::]:*
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:8442          [::]:*
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:8447          [::]:*
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:8446          [::]:*
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:8445          [::]:*
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:8444          [::]:*
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:8451          [::]:*
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:44599         [::]:*
+LISTEN 0      4096                                     [::]:9443          [::]:*
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:44141         [::]:*
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:44150         [::]:*
+LISTEN 0      4096                                     [::]:8888          [::]:*
+LISTEN 0      4096                                     [::]:9090          [::]:*
+LISTEN 0      4096                                     [::]:9000          [::]:*
+LISTEN 0      128                                      [::]:8644          [::]:*    users:(("courier",pid=3021873,fd=27))
+LISTEN 0      4096   [fd7a:115c:a1e0::42]%tailscale0:63089         [::]:*
+LISTEN 0      4096                                    [::1]:631           [::]:*

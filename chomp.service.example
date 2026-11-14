@@ -1,0 +1,31 @@
+[Unit]
+Description=Chomp API
+After=network.target
+
+[Service]
+Type=simple
+# Replace with the user that owns the install
+User=YOUR_USER
+# Path to the built API package
+WorkingDirectory=/home/YOUR_USER/chomp-prod/packages/api
+# Adjust PATH to include your Node install (fnm/nvm/system node)
+Environment=PATH=/home/YOUR_USER/.local/bin:/home/YOUR_USER/.local/share/fnm/node-versions/v24.13.1/installation/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=/home/YOUR_USER/chomp-prod/.env
+Environment=NODE_ENV=production
+Environment=PORT=3002
+ExecStart=/home/YOUR_USER/.local/share/fnm/node-versions/v24.13.1/installation/bin/node dist/index.js
+Restart=on-failure
+RestartSec=5
+
+# Agents are spawned as detached child processes (claude-runner uses
+# detached: true + child.unref()). The default KillMode=control-group sends
+# SIGTERM to the entire cgroup on `systemctl stop`, which kills those
+# children mid-thought and surfaces as "Claude exited with code 143" in chat.
+# KillMode=process signals only the main API pid, leaving detached agents
+# running; they reparent to init and finish, and the API reconnects to them
+# on next startup via persistRunningSession().
+KillMode=process
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,66 @@
+[
+ {
+  "headers": {
+   "customResponseHeaders": {
+    "Cache-Control": "public, max-age=31536000, immutable"
+   }
+  },
+  "status": "enabled",
+  "name": "recipesresize-cache@docker",
+  "provider": "docker",
+  "type": "headers"
+ },
+ {
+  "headers": {
+   "stsSeconds": 31536000,
+   "frameDeny": true,
+   "contentTypeNosniff": true,
+   "referrerPolicy": "no-referrer"
+  },
+  "status": "enabled",
+  "usedBy": [
+   "fitnessapi@docker"
+  ],
+  "name": "fitnessapi-headers@docker",
+  "provider": "docker",
+  "type": "headers"
+ },
+ {
+  "ipAllowList": {
+   "sourceRange": [
+    "100.64.0.0/10",
+    "10.0.2.0/24",
+    "172.18.0.0/16"
+   ]
+  },
+  "status": "enabled",
+  "usedBy": [
+   "collector@file",
+   "listings@file",
+   "menumap@docker",
+   "index@docker",
+   "relay-board@file",
+   "site-index@file",
+   "travel-globe@docker"
+  ],
+  "name": "tailnet-only@file",
+  "provider": "file",
+  "type": "ipallowlist"
+ },
+ {
+  "ipAllowList": {
+   "sourceRange": [
+    "100.64.0.0/10",
+    "172.18.0.0/16"
+   ]
+  },
+  "status": "enabled",
+  "usedBy": [
+   "bookmarks@file",
+   "invoices-web@file"
+  ],
+  "name": "tailnet-strict@file",
+  "provider": "file",
+  "type": "ipallowlist"
+ }
+]

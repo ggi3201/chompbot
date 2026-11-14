@@ -1,0 +1,114 @@
+{
+  "host": "rpi",
+  "ts": 1794098882000,
+  "agent": "linux",
+  "metrics": {
+    "cpu_pct": 0.0,
+    "mem_pct": 11.8,
+    "mem_used_gb": 0.93,
+    "mem_total_gb": 7.86,
+    "disk_pct": 12.9,
+    "disk_used_gb": 28.66,
+    "disk_total_gb": 234.04,
+    "load1": 0.0,
+    "load5": 0.01,
+    "uptime_sec": 9482135,
+    "temp_c": 54.0
+  },
+  "listeners": [
+    {
+      "bind": "0.0.0.0",
+      "port": 9001
+    },
+    {
+      "bind": "0.0.0.0",
+      "port": 5000
+    },
+    {
+      "bind": "0.0.0.0",
+      "port": 22
+    },
+    {
+      "bind": "127.0.0.1",
+      "port": 631
+    },
+    {
+      "bind": "127.0.0.1",
+      "port": 41963
+    },
+    {
+      "bind": "0.0.0.0",
+      "port": 2222
+    },
+    {
+      "bind": "::",
+      "port": 9001
+    },
+    {
+      "bind": "::",
+      "port": 5000
+    },
+    {
+      "bind": "::",
+      "port": 22
+    },
+    {
+      "bind": "::1",
+      "port": 631
+    },
+    {
+      "bind": "::",
+      "port": 2222
+    }
+  ],
+  "containers": [
+    {
+      "Command": "\"docker-entrypoint.s\u2026\"",
+      "CreatedAt": "2026-10-03 11:46:40 +0100 BST",
+      "ID": "b8b3990985d2",
+      "Image": "scraper_app",
+      "Labels": "com.docker.compose.project=scraper,com.docker.compose.project.config_files=docker-compose.yml,com.docker.compose.project.working_dir=/home/pi/code/actions-runner/_work/scraper/scraper,com.docker.compose.service=app,com.docker.compose.version=1.29.2,com.docker.compose.config-hash=0000000000000000000000000000000000000000000000000000000000000003,com.docker.compose.container-number=1,com.docker.compose.oneoff=False",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Names": "scraper_app_1",
+      "Networks": "scraper_default",
+      "Ports": "0.0.0.0:5000->5000/tcp, :::5000->5000/tcp",
+      "RunningFor": "5 weeks ago",
+      "Size": "173MB (virtual 1.51GB)",
+      "State": "running",
+      "Status": "Up 5 weeks"
+    },
+    {
+      "Command": "\"sleep infinity\"",
+      "CreatedAt": "2026-10-02 08:13:30 +0100 BST",
+      "ID": "e58a7bd39902",
+      "Image": "kalilinux/kali-rolling",
+      "Labels": "org.opencontainers.image.created=2026-09-27T04:05:08Z,org.opencontainers.image.url=https://www.kali.org/,org.opencontainers.image.vendor=OffSec,org.opencontainers.image.revision=4d1ddb93,org.opencontainers.image.source=https://gitlab.com/kalilinux/build-scripts/kali-docker,org.opencontainers.image.title=Kali Linux (kali-rolling branch),org.opencontainers.image.version=2026.09.27,io.buildah.version=1.43.2,org.opencontainers.image.authors=Kali Developers <devel@kali.org>,org.opencontainers.image.description=Official Kali Linux container image for kali-rolling",
+      "LocalVolumes": "1",
+      "Mounts": "kali-data",
+      "Names": "kali",
+      "Networks": "host",
+      "Ports": "",
+      "RunningFor": "5 weeks ago",
+      "Size": "8.61GB (virtual 8.76GB)",
+      "State": "running",
+      "Status": "Up 5 weeks"
+    },
+    {
+      "Command": "\"./agent\"",
+      "CreatedAt": "2026-02-21 23:56:17 +0000 GMT",
+      "ID": "16ade610e662",
+      "Image": "portainer/agent:2.33.7",
+      "Labels": "io.portainer.agent=true",
+      "LocalVolumes": "0",
+      "Mounts": "/,/var/lib/docke\u2026,/var/run/docke\u2026",
+      "Names": "portainer_agent",
+      "Networks": "bridge",
+      "Ports": "0.0.0.0:9001->9001/tcp, :::9001->9001/tcp",
+      "RunningFor": "8 months ago",
+      "Size": "2.73kB (virtual 130MB)",
+      "State": "running",
+      "Status": "Up 3 months"
+    }
+  ]
+}

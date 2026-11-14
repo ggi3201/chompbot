@@ -1,0 +1,11 @@
+{
+  "name": "chomp",
+  "owner": { "name": "Chomp" },
+  "plugins": [
+    {
+      "name": "chomp",
+      "source": "./plugins/chomp",
+      "description": "Talk to Chomp from Claude Code: read your Chomp chats and memories, and message or start chats."
+    }
+  ]
+}

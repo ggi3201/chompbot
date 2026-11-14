@@ -1,0 +1,742 @@
+[
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "tailnet-strict@file"
+  ],
+  "service": "bookmarks",
+  "rule": "Host(`bookmarks.home.example.com`)",
+  "priority": 26,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "bookmarks@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "traefik"
+  ],
+  "service": "api@internal",
+  "rule": "PathPrefix(`/api`)",
+  "ruleSyntax": "default",
+  "priority": 9223372036854776000,
+  "status": "enabled",
+  "using": [
+   "traefik"
+  ],
+  "name": "api@internal",
+  "provider": "internal"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "shop-api",
+  "rule": "Host(`api.apps.example.net`)",
+  "priority": 24,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "shop-api@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "service": "shop-landing",
+  "rule": "Host(`apps.example.org`) || Host(`www.apps.example.org`) || Host(`app.apps.example.net`) || (Host(`apps.example.net`) && (PathRegexp(`^/(about|tools|embed|bmi-calculator|calorie-calculator|calories-to-lose-weight|one-rep-max|one-rep-max-calculator|percentage-of-1rm-chart|plate-calculator|protein-calculator|rpe-chart|warm-up-calculator|llms[.]txt|llms-full[.]txt)(/|$)`) || (Path(`/`) && !QueryRegexp(`shareWith`, `.+`))))",
+  "priority": 1000,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "shop-landing@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "service": "shop",
+  "rule": "Host(`apps.example.net`)",
+  "priority": 20,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "shop@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "chomp-tailscale",
+  "rule": "Host(`server.example-tailnet.ts.net`)",
+  "priority": 40,
+  "tls": {
+   "options": "default",
+   "certResolver": "tailscale"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "chomp-tailscale@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "tailnet-only@file"
+  ],
+  "service": "collector",
+  "rule": "Host(`looks.home.example.com`)",
+  "priority": 28,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "collector@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "traefik"
+  ],
+  "middlewares": [
+   "dashboard_redirect@internal",
+   "dashboard_stripprefix@internal"
+  ],
+  "service": "dashboard@internal",
+  "rule": "PathPrefix(`/`)",
+  "ruleSyntax": "default",
+  "priority": 9223372036854776000,
+  "status": "enabled",
+  "using": [
+   "traefik"
+  ],
+  "name": "dashboard@internal",
+  "provider": "internal"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "tailnet-only@file"
+  ],
+  "service": "listings",
+  "rule": "Host(`listings.home.example.com`)",
+  "priority": 30,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "listings@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "tailnet-only@file"
+  ],
+  "service": "preview",
+  "rule": "Host(`menumap.home.example.com`)",
+  "priority": 32,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "menumap@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "service": "recipes-landing",
+  "rule": "Host(`recipes.apps.example.org`) || Host(`recipes.apps.example.net`)",
+  "priority": 58,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "recipes-landing@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "service": "recipesapi",
+  "rule": "Host(`recipesapi.apps.example.net`)",
+  "priority": 30,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "recipesapi@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "service": "recipesapi",
+  "rule": "Host(`recipesapp.apps.example.net`)",
+  "priority": 30,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "recipesapp@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "recipesimages-prefix@docker"
+  ],
+  "service": "recipesimages",
+  "rule": "Host(`images.apps.example.net`)",
+  "priority": 10,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "recipesimages@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "recipesresize-path@docker"
+  ],
+  "service": "recipesresize",
+  "rule": "Host(`images.apps.example.net`) && PathPrefix(`/rs/`)",
+  "priority": 100,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "recipesresize@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "community-app-showcase",
+  "rule": "Host(`community-app.home.example.com`)",
+  "priority": 28,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "community-app-showcase@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "trails-web",
+  "rule": "Host(`personal-site.home.example.com`)",
+  "priority": 31,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "trails-web@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "tailnet-only@file"
+  ],
+  "service": "preview",
+  "rule": "Host(`index.home.example.com`)",
+  "priority": 28,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "index@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "service": "fitness-landing",
+  "rule": "Host(`fitness.apps.example.org`) || Host(`fitness.apps.example.net`)",
+  "priority": 54,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "fitness-landing@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "middlewares": [
+   "fitnessapi-headers@docker"
+  ],
+  "service": "fitnessapi",
+  "rule": "Host(`fitnessapi.home.example.com`)",
+  "priority": 30,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "fitnessapi@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "social-posts",
+  "rule": "Host(`social.home.example.com`)",
+  "priority": 31,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "social-posts@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "home-sites-web",
+  "rule": "Host(`home.example.com`) || Host(`www.home.example.com`)",
+  "priority": 52,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "home-sites-web@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "ly-web",
+  "rule": "Host(`ly.home.example.com`)",
+  "priority": 25,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "ly-web@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "status-app",
+  "rule": "Host(`city-app.home.example.com`)",
+  "priority": 30,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "city-app@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "service": "rocket",
+  "rule": "Host(`api.service.example.org`)",
+  "priority": 28,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "rocket@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "portfolio-web",
+  "rule": "Host(`portfolio.home.example.com`)",
+  "priority": 32,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "portfolio-web@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "preview",
+  "rule": "Host(`preview.home.example.com`)",
+  "priority": 30,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "preview@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "tailnet-strict@file"
+  ],
+  "service": "invoices-web",
+  "rule": "Host(`invoices.home.example.com`)",
+  "priority": 31,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "invoices-web@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "tailnet-only@file"
+  ],
+  "service": "relay-board",
+  "rule": "Host(`board.home.example.com`)",
+  "priority": 28,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "relay-board@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "tailnet-only@file"
+  ],
+  "service": "site-index",
+  "rule": "Host(`index.home.example.com`)",
+  "priority": 100,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "site-index@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "status-app",
+  "rule": "Host(`status-app.home.example.com`)",
+  "priority": 31,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "status-app@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "service": "atelier-landing",
+  "rule": "Host(`atelier.apps.example.org`) || Host(`atelier.apps.example.net`)",
+  "priority": 58,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "atelier-landing@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "service": "atelierapi",
+  "rule": "Host(`atelierapi.apps.example.net`)",
+  "priority": 30,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "atelierapi@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web",
+   "websecure"
+  ],
+  "service": "atelierapistg",
+  "rule": "Host(`atelierapi-stg.apps.example.net`)",
+  "priority": 34,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "web",
+   "websecure"
+  ],
+  "name": "atelierapistg@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "middlewares": [
+   "tailnet-only@file"
+  ],
+  "service": "travel-globe",
+  "rule": "Host(`globe.home.example.com`)",
+  "priority": 28,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "travel-globe@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "travel-app",
+  "rule": "Host(`journeys.home.example.com`)",
+  "priority": 28,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "travel-app@file",
+  "provider": "file"
+ },
+ {
+  "entryPoints": [
+   "websecure"
+  ],
+  "service": "clock-web",
+  "rule": "Host(`clock.home.example.com`)",
+  "priority": 26,
+  "tls": {
+   "options": "default",
+   "certResolver": "cloudflare"
+  },
+  "status": "enabled",
+  "using": [
+   "websecure"
+  ],
+  "name": "clock-web@docker",
+  "provider": "docker"
+ },
+ {
+  "entryPoints": [
+   "web"
+  ],
+  "middlewares": [
+   "redirect-web-to-websecure@internal"
+  ],
+  "service": "noop@internal",
+  "rule": "HostRegexp(`^.+$`)",
+  "ruleSyntax": "default",
+  "priority": 9223372036854776000,
+  "status": "enabled",
+  "using": [
+   "web"
+  ],
+  "name": "web-to-websecure@internal",
+  "provider": "internal"
+ }
+]

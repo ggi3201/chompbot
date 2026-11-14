@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Chomp</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>chomp</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ChompAppGroup</key>
+	<string>group.$(CHOMP_BUNDLE_ID)</string>
+	<key>ChompDefaultServerHost</key>
+	<string>$(CHOMP_DEFAULT_SERVER_HOST)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Lets Chomp read and add calendar events on your behalf.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Lets you take a photo and send it to Chomp in a chat.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Lets Chomp look up people by name so the agent can email or message them.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Lets Chomp read steps, sleep, heart rate, and active energy so the agent can summarize them.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Reserved — Chomp does not currently write health data.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Lets Chomp know where you are when you or an agent asks, also with the app closed or the phone locked. Your phone tells your own Chomp server when you move, using very little battery.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Lets Chomp answer 'where am I?' and route location-aware questions to your agent.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Lets you speak a message. The audio is sent to your Chomp server and turned into text.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Lets Chomp save images it generates or receives back into your photo library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Lets Chomp retrieve recent photos when you ask the agent about them.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Lets Chomp read and create reminders on your behalf.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+	</dict>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+</dict>
+</plist>

@@ -1,0 +1,22 @@
+{
+ "success": true,
+ "errors": [],
+ "result": [
+  {
+   "id": "00000000-0000-4000-8000-000000000010",
+   "name": "chomp-webhooks",
+   "status": "healthy",
+   "config_src": "cloudflare",
+   "created_at": "2026-03-21T11:19:50.089680Z",
+   "remote_config": true
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000011",
+   "name": "home-tunnel",
+   "status": "down",
+   "config_src": "local",
+   "created_at": "2026-03-23T15:30:46.450315Z",
+   "remote_config": false
+  }
+ ]
+}
