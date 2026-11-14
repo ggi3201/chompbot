@@ -29,17 +29,19 @@ test("cleanup is opt-in and runs no commands without configured repos", async ()
   expect(mocks.execFileSync).not.toHaveBeenCalled();
 });
 
-test.each([
-  "not json",
-  "{}",
-  '[{"path":"relative/path"}]',
-  '[{"path":"/repo","remote":"--upload-pack=evil"}]',
-  '[{"path":"/valid"},{"path":"relative"}]',
-])("invalid config fails closed before any cleanup: %s", async (value) => {
-  vi.stubEnv("WORKTREE_CLEANUP_REPOS", value);
-  const result = await cleanupWorktrees();
-  expect(result.cleaned).toEqual([]);
-  expect(result.errors).toEqual([expect.stringContaining("Invalid WORKTREE_CLEANUP_REPOS")]);
+test("invalid config fails closed before any cleanup", async () => {
+  for (const value of [
+    "not json",
+    "{}",
+    '[{"path":"relative/path"}]',
+    '[{"path":"/repo","remote":"--upload-pack=evil"}]',
+    '[{"path":"/valid"},{"path":"relative"}]',
+  ]) {
+    vi.stubEnv("WORKTREE_CLEANUP_REPOS", value);
+    const result = await cleanupWorktrees();
+    expect(result.cleaned, value).toEqual([]);
+    expect(result.errors, value).toEqual([expect.stringContaining("Invalid WORKTREE_CLEANUP_REPOS")]);
+  }
   expect(mocks.execFileSync).not.toHaveBeenCalled();
 });
 

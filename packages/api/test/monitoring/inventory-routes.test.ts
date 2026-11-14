@@ -73,7 +73,7 @@ describe("after a run", () => {
     expect(JSON.stringify(row)).not.toMatch(/172\.\d+\.\d+\.\d+/); // the container address stays inside
   });
 
-  test("hidden and retired targets are listed, flagged, and left out of the verdict", async () => {
+  test("hidden and retired targets are listed, flagged, and left out of the verdict; the overview lists open warnings", async () => {
     expect(await rowOf("mini:5126")).toMatchObject({ hidden: true, retired: false });
     addTarget({ key: "old-site", tracked: true, retiredAt: "2026-11-01T00:00:00.000Z", status: "down" });
     expect(await rowOf("old-site")).toMatchObject({ retired: true });
@@ -82,12 +82,9 @@ describe("after a run", () => {
     const { targets } = await get("/targets");
     expect(overview.counts.total).toBe(targets.filter((t: { tracked: boolean; hidden: boolean; retired: boolean }) => t.tracked && !t.hidden && !t.retired).length);
     expect(overview.counts.total).toBe(43); // the hostnames Traefik or the tunnel route
-  });
-
-  test("GET /overview lists the open warnings", async () => {
-    const { warnings } = await get("/overview");
-    expect(warnings.length).toBeGreaterThanOrEqual(13);
-    expect(warnings).toContainEqual(expect.objectContaining({ key: "tunnel-without-router:ideas.home.example.com", targetKey: "ideas.home.example.com", kind: "tunnel-without-router" }));
+    // The overview also lists the open warnings.
+    expect(overview.warnings.length).toBeGreaterThanOrEqual(13);
+    expect(overview.warnings).toContainEqual(expect.objectContaining({ key: "tunnel-without-router:ideas.home.example.com", targetKey: "ideas.home.example.com", kind: "tunnel-without-router" }));
   });
 
   test("GET /ports lists every listener once, with its owner, reach and the target that checks it", async () => {
@@ -104,10 +101,8 @@ describe("after a run", () => {
     expect(byPort.get(4130)).toMatchObject({ bind: "100.64.0.42", exposure: "tailnet", targetKey: "bookmarks.home.example.com" }); // the hostname speaks for the port
     expect(byPort.get(4127)).toMatchObject({ exposure: "lan", targetKey: "mini:4127" });
     expect(byPort.get(6379)).toMatchObject({ owner: "redis", exposure: "lan" });
-  });
 
-  test("ports nobody claims have no target", async () => {
-    const { ports } = await get("/ports");
+    // Ports nobody claims have no target.
     const unclaimed = ports.filter((p: { targetKey: string | null }) => p.targetKey === null).map((p: { port: number }) => p.port);
     expect(unclaimed).toEqual(expect.arrayContaining([22, 53, 631, 11434, 44599, 51810]));
     expect(unclaimed).not.toContain(5433);
@@ -147,16 +142,14 @@ describe("after a run", () => {
 describe("PATCH /targets/:key", () => {
   beforeEach(() => { addTarget({ key: "web", title: "Web", project: "old", tracked: false }); });
 
-  test("changes the fields sent and answers with the new row", async () => {
+  test("changes the fields sent and answers with the new row, leaving the others alone", async () => {
+    await patch("web", { notes: "n" });
+    expect(getTarget("web")).toMatchObject({ title: "Web", project: "old", tracked: false, notes: "n", userFields: ["notes"] });
+
     const res = await patch("web", { tracked: true, hidden: true, title: "  My web  ", project: "Chomp", notes: "Behind the VPN", expectedStatus: 401 });
     expect(res.status).toBe(200);
     expect((await res.json()).target).toMatchObject({ key: "web", tracked: true, hidden: true, title: "My web", project: "Chomp", notes: "Behind the VPN", expectedStatus: 401 });
     expect(getTarget("web")!.userFields.sort()).toEqual(["expectedStatus", "hidden", "notes", "project", "title", "tracked"]);
-  });
-
-  test("leaves the fields it was not sent alone", async () => {
-    await patch("web", { notes: "n" });
-    expect(getTarget("web")).toMatchObject({ title: "Web", project: "old", tracked: false, notes: "n", userFields: ["notes"] });
   });
 
   test("clears project, notes and the expected status with null or an empty string", async () => {

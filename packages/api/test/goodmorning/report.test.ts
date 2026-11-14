@@ -29,10 +29,12 @@ beforeAll(async () => {
 });
 afterAll(() => server.close());
 
-test("a report survives saving, with empty sections filled in", () => {
+test("a report survives saving, with empty sections filled in, and a missing day is null", () => {
   saveReport(reportSchema.parse(REPORT));
   expect(loadReport("2026-11-05")).toMatchObject({ place: "Oslo", headsUp: [], news: [], inbox: [] });
   expect(existsSync(`${reportsDir}/2026-11-05.json`)).toBe(true);
+  // A missing day is no report, not an error.
+  expect(loadReport("2001-01-01")).toBeNull();
 });
 
 test("a report opens a chat holding its text, and publishing again updates that one message", () => {
@@ -49,18 +51,12 @@ test("a report opens a chat holding its text, and publishing again updates that 
   expect(messages[0].content).not.toContain("Pack socks");
 });
 
-test("a missing day is no report, not an error", () => {
-  expect(loadReport("2001-01-01")).toBeNull();
-});
-
-test("only the real key passes", () => {
+test("only the real key passes, and the link carries it", () => {
   expect(isReportKey(reportKey())).toBe(true);
   expect(isReportKey("nope")).toBe(false);
   expect(isReportKey(undefined)).toBe(false);
   expect(isReportKey([reportKey()])).toBe(false);
-});
-
-test("the link carries the date and key", () => {
+  // The link carries the date and key.
   expect(reportUrl("2026-11-05")).toContain(`/goodmorning?date=2026-11-05&key=${reportKey()}`);
 });
 

@@ -5,23 +5,18 @@ const empty: WarningInput = { ports: [], tunnelWithoutRouter: [], directHostname
 const port = (over: Partial<WarningInput["ports"][number]>) => ({ targetKey: "mini:5433", port: 5433, bind: "0.0.0.0", image: "postgres:17", label: "recipes_db", ...over });
 const kinds = (input: Partial<WarningInput>) => evaluateWarnings({ ...empty, ...input }).map((f) => f.key);
 
-test("a database or cache image on every address is open to the LAN", () => {
+test("a database or cache on every address is open to the LAN, by image, by process name, or on the IPv6 wildcard", () => {
   for (const image of ["postgres:17-alpine", "pgvector/pgvector:pg16", "redis:alpine", "mysql:8", "mariadb:11", "mongo:7", "clickhouse/clickhouse-server:24.3", "minio/minio"]) {
     expect(kinds({ ports: [port({ image })] })).toEqual(["database-open-lan:5433"]);
   }
+  expect(kinds({ ports: [port({ bind: "::" })] })).toEqual(["database-open-lan:5433"]);
+  expect(kinds({ ports: [port({ image: null, label: "redis-server", port: 6379 })] })).toEqual(["database-open-lan:6379"]);
+  expect(evaluateWarnings({ ...empty, ports: [port({})] })[0]).toMatchObject({ kind: "database-open-lan", targetKey: "mini:5433" });
 });
 
 test("the same database bound to loopback or the tailnet is not a warning, and neither is an ordinary web app", () => {
   expect(kinds({ ports: [port({ bind: "127.0.0.1" }), port({ port: 5434, bind: "100.64.0.42" })] })).toEqual([]);
   expect(kinds({ ports: [port({ image: "nginx:alpine", label: "web" })] })).toEqual([]);
-});
-
-test("an IPv6 wildcard counts as every address", () => {
-  expect(kinds({ ports: [port({ bind: "::" })] })).toEqual(["database-open-lan:5433"]);
-});
-
-test("a host process is judged by its name when it has no image", () => {
-  expect(kinds({ ports: [port({ image: null, label: "redis-server", port: 6379 })] })).toEqual(["database-open-lan:6379"]);
 });
 
 test("an admin UI on every address is open to the LAN: portainer, dashy, kuma, code-server", () => {
@@ -33,22 +28,10 @@ test("an admin UI on every address is open to the LAN: portainer, dashy, kuma, c
   expect(kinds({ ports: [port({ image: "portainer/portainer-ce", label: "portainer", bind: "127.0.0.1" })] })).toEqual([]);
 });
 
-test("each finding names its target and says what is wrong in plain words", () => {
-  const [finding] = evaluateWarnings({ ...empty, ports: [port({})] });
-  expect(finding).toEqual({
-    key: "database-open-lan:5433", kind: "database-open-lan", targetKey: "mini:5433",
-    text: "recipes_db is a database or cache, and port 5433 is open to the LAN.",
-  });
-});
-
-test("a tunnel route with no Traefik router is a warning on its hostname", () => {
-  expect(evaluateWarnings({ ...empty, tunnelWithoutRouter: ["ideas.home.example.com"] })).toEqual([{
+test("a tunnel route with no Traefik router, and a hostname on the home IP, are warnings on the hostname", () => {
+  expect(evaluateWarnings({ ...empty, tunnelWithoutRouter: ["ideas.home.example.com"] })).toEqual([expect.objectContaining({
     key: "tunnel-without-router:ideas.home.example.com", kind: "tunnel-without-router", targetKey: "ideas.home.example.com",
-    text: "ideas.home.example.com is in the tunnel, but Traefik has no router for it. Requests get a 404.",
-  }]);
-});
-
-test("a hostname on the home IP is a warning", () => {
+  })]);
   expect(kinds({ directHostnames: ["direct.home.example.com"] })).toEqual(["public-direct:direct.home.example.com"]);
 });
 

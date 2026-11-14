@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { normalizePlaylistItemUri, formatAudioFeatures, execTrackMetrics } from "../../src/agents/tools/spotify.js";
 
-test("normalizes Spotify playlist item URIs", () => {
+test("normalizes Spotify playlist item URIs, treats bare IDs as tracks, and rejects the rest", () => {
   expect(normalizePlaylistItemUri("spotify:track:4cOdK2wGLETKBW3PvgPWqT")).toBe(
     "spotify:track:4cOdK2wGLETKBW3PvgPWqT",
   );
@@ -14,13 +14,9 @@ test("normalizes Spotify playlist item URIs", () => {
   expect(normalizePlaylistItemUri("https://open.spotify.com/episode/3fuz0q5vlIQE1DB6JmKZ8B?si=abc")).toBe(
     "spotify:episode:3fuz0q5vlIQE1DB6JmKZ8B",
   );
-});
-
-test("treats bare 22-character IDs as tracks for backwards compatibility", () => {
+  // Bare 22-character IDs are tracks, for backwards compatibility.
   expect(normalizePlaylistItemUri("4cOdK2wGLETKBW3PvgPWqT")).toBe("spotify:track:4cOdK2wGLETKBW3PvgPWqT");
-});
-
-test("rejects unsupported Spotify playlist item inputs", () => {
+  // Unsupported inputs.
   expect(normalizePlaylistItemUri("spotify:album:0sNOF9WDwhWunNAHPD3Baj")).toBeNull();
   expect(normalizePlaylistItemUri("https://open.spotify.com/show/3fuz0q5vlIQE1DB6JmKZ8B")).toBeNull();
   expect(normalizePlaylistItemUri("")).toBeNull();

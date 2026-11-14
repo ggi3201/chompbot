@@ -33,11 +33,9 @@ test("a router that admits only tailnet and Docker ranges keeps its hostname ins
   expect(isTailnetOnly([])).toBe(false);
 });
 
-test("a hostname in the tunnel is public through the tunnel, even when its backend is only local", () => {
+test("a hostname in the tunnel is public even when its backend is only local; one on the home IP is public direct", () => {
   expect(classify(reach({ tunnel: true, route: { allowedRanges: null }, binds: [null] }))).toBe("public-tunnel");
-});
-
-test("a DNS record on the home IP is public direct, which beats the tunnel", () => {
+  // A DNS record on the home IP is public direct, which beats the tunnel.
   expect(classify(reach({ direct: true, tunnel: true }))).toBe("public-direct");
   expect(classify(reach({ direct: true }))).toBe("public-direct");
 });
@@ -46,9 +44,7 @@ test("a Traefik hostname is LAN, or tailnet when the router's allow-list says so
   expect(classify(reach({ route: { allowedRanges: null }, binds: [null] }))).toBe("lan");
   expect(classify(reach({ route: { allowedRanges: ["100.64.0.0/10", "10.0.2.0/24"] } }))).toBe("lan");
   expect(classify(reach({ route: { allowedRanges: ["100.64.0.0/10"] }, binds: ["100.64.0.42"] }), TAILNET)).toBe("tailnet");
-});
-
-test("a tailnet-only hostname whose backend listens on every address is still reachable from the LAN", () => {
+  // A tailnet-only hostname whose backend listens on every address is still reachable from the LAN.
   expect(classify(reach({ route: { allowedRanges: ["100.64.0.0/10"] }, binds: ["0.0.0.0"] }), TAILNET)).toBe("lan");
 });
 

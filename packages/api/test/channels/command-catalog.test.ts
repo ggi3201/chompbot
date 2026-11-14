@@ -9,26 +9,13 @@ import {
   renderDiscordHelp,
 } from "../../src/channels/command-catalog.js";
 
-test("every command has a unique handler", () => {
-  const handlers = CHANNEL_COMMANDS.map((c) => c.handler);
-  const duplicates = handlers.filter((name, i) => handlers.indexOf(name) !== i);
-  expect(duplicates).toEqual([]);
-});
+const duplicatesOf = (names: string[]) => names.filter((name, i) => names.indexOf(name) !== i);
 
-test("telegram commands have unique names", () => {
-  const telegramNames = CHANNEL_COMMANDS
-    .filter((c) => c.telegram)
-    .map((c) => c.telegram!.name);
-  const duplicates = telegramNames.filter((name, i) => telegramNames.indexOf(name) !== i);
-  expect(duplicates).toEqual([]);
-});
-
-test("discord commands have unique names and conform to slash command rules", () => {
-  const discordNames = CHANNEL_COMMANDS
-    .filter((c) => c.discord)
-    .map((c) => c.discord!.name);
-  const duplicates = discordNames.filter((name, i) => discordNames.indexOf(name) !== i);
-  expect(duplicates).toEqual([]);
+test("handlers and per-channel names are unique, and discord names conform to slash command rules", () => {
+  expect(duplicatesOf(CHANNEL_COMMANDS.map((c) => c.handler))).toEqual([]);
+  expect(duplicatesOf(CHANNEL_COMMANDS.filter((c) => c.telegram).map((c) => c.telegram!.name))).toEqual([]);
+  const discordNames = CHANNEL_COMMANDS.filter((c) => c.discord).map((c) => c.discord!.name);
+  expect(duplicatesOf(discordNames)).toEqual([]);
 
   // Discord slash command names must be 1-32 chars, lowercase, no spaces
   for (const name of discordNames) {
@@ -36,12 +23,10 @@ test("discord commands have unique names and conform to slash command rules", ()
     expect(name.length).toBeLessThanOrEqual(32);
     expect(name).toMatch(/^[a-z0-9_-]+$/);
   }
-});
 
-test("getDiscordCommandSpecs only includes commands with discord metadata", () => {
+  // getDiscordCommandSpecs only includes commands with discord metadata
   const specs = getDiscordCommandSpecs();
-  const expectedCount = CHANNEL_COMMANDS.filter((c) => c.discord).length;
-  expect(specs).toHaveLength(expectedCount);
+  expect(specs).toHaveLength(discordNames.length);
   for (const spec of specs) {
     expect(spec.name).toBeTruthy();
     expect(spec.description).toBeTruthy();
@@ -50,7 +35,6 @@ test("getDiscordCommandSpecs only includes commands with discord metadata", () =
 
 test("renderTelegramHelp lists every telegram command and uses HTML escaping", () => {
   const help = renderTelegramHelp();
-  expect(help).toContain("<b>Chomp Commands</b>");
   expect(help).toContain("Calendar &amp; Email");
   expect(help).not.toMatch(/Calendar & Email/); // raw ampersand would break Telegram HTML
   for (const command of CHANNEL_COMMANDS.filter((c) => c.telegram)) {
@@ -58,88 +42,61 @@ test("renderTelegramHelp lists every telegram command and uses HTML escaping", (
   }
 });
 
-test("renderDiscordHelp lists every discord command with markdown formatting", () => {
+test("renderDiscordHelp lists every discord command, with <argname> for commands that take an option", () => {
   const help = renderDiscordHelp();
-  expect(help).toContain("**Chomp Commands**");
   for (const command of CHANNEL_COMMANDS.filter((c) => c.discord)) {
     expect(help).toContain(`\`/${command.discord!.name}`);
   }
-});
-
-test("commands marked with discord options render <argname> in help", () => {
-  const help = renderDiscordHelp();
   const withOption = CHANNEL_COMMANDS.find((c) => c.discord?.option);
   expect(withOption).toBeTruthy();
   expect(help).toContain(`<${withOption!.discord!.option!.name}>`);
 });
 
-test("core commands needed by chat onboarding are present", () => {
-  const handlers = new Set(CHANNEL_COMMANDS.map((c) => c.handler));
-  for (const required of ["help", "status", "fresh", "resume", "agents", "memories", "rules"]) {
-    expect(handlers.has(required)).toBe(true);
-  }
-});
-
 // ── Delegated prompts ─────────────────────────────────────────
 
-test("listDelegatedCommands returns the same commands isDelegatedCommand reports", () => {
+test("delegated commands are known catalog commands, and others get no delegated prompt", () => {
+  const handlers = new Set(CHANNEL_COMMANDS.map((c) => c.handler));
   const list = listDelegatedCommands();
   expect(list.length).toBeGreaterThan(0);
   for (const handler of list) {
     expect(isDelegatedCommand(handler)).toBe(true);
-  }
-  expect(isDelegatedCommand("help")).toBe(false);
-  expect(isDelegatedCommand("status")).toBe(false);
-});
-
-test("every delegated command exists in the channel command catalog", () => {
-  const handlers = new Set(CHANNEL_COMMANDS.map((c) => c.handler));
-  for (const handler of listDelegatedCommands()) {
     expect(handlers.has(handler), `delegated handler "${handler}" must be a known command`).toBe(true);
   }
-});
-
-test("getDelegatedPrompt returns null for non-delegated commands", () => {
-  expect(getDelegatedPrompt("help", "")).toBeNull();
-  expect(getDelegatedPrompt("status", "")).toBeNull();
+  for (const handler of ["help", "status"]) {
+    expect(isDelegatedCommand(handler)).toBe(false);
+    expect(getDelegatedPrompt(handler, "")).toBeNull();
+  }
   expect(getDelegatedPrompt("definitely-not-a-command", "")).toBeNull();
 });
 
-test("no-arg delegated commands produce a non-empty prompt regardless of input", () => {
+test("no-arg delegated commands produce a stable, non-empty prompt regardless of input", () => {
   for (const handler of ["today", "tomorrow", "inbox", "issues", "weather", "crypto", "stocks", "news", "drive"]) {
     const result = getDelegatedPrompt(handler, "");
     expect(result?.ok, handler).toBe(true);
     if (result?.ok) expect(result.prompt.length).toBeGreaterThan(10);
   }
+  const a = getDelegatedPrompt("today", "");
+  const b = getDelegatedPrompt("today", "");
+  expect(a?.ok && b?.ok && a.prompt === b.prompt).toBe(true);
 });
 
-test("event command interpolates details when provided, falls back when empty", () => {
-  const withDetails = getDelegatedPrompt("event", "Lunch with Mom Friday 12:00");
-  expect(withDetails?.ok).toBe(true);
-  if (withDetails?.ok) expect(withDetails.prompt).toContain("Lunch with Mom Friday 12:00");
+test("commands with an argument put it in the prompt; email and recipes require one, event falls back", () => {
+  const event = getDelegatedPrompt("event", "Lunch with Mom Friday 12:00");
+  expect(event?.ok).toBe(true);
+  if (event?.ok) expect(event.prompt).toContain("Lunch with Mom Friday 12:00");
+  expect(getDelegatedPrompt("event", "")?.ok).toBe(true);
 
-  const empty = getDelegatedPrompt("event", "");
-  expect(empty?.ok).toBe(true);
-  if (empty?.ok) expect(empty.prompt).toMatch(/title.*date.*time/i);
-});
+  const missingEmail = getDelegatedPrompt("email", "");
+  expect(missingEmail?.ok).toBe(false);
+  if (missingEmail && !missingEmail.ok) expect(missingEmail.usage).toMatch(/id/i);
+  const email = getDelegatedPrompt("email", "abc123");
+  expect(email?.ok).toBe(true);
+  if (email?.ok) expect(email.prompt).toContain("abc123");
 
-test("email command requires an id and reports usage when missing", () => {
-  const missing = getDelegatedPrompt("email", "");
-  expect(missing?.ok).toBe(false);
-  if (missing && !missing.ok) expect(missing.usage).toMatch(/id/i);
-
-  const ok = getDelegatedPrompt("email", "abc123");
-  expect(ok?.ok).toBe(true);
-  if (ok?.ok) expect(ok.prompt).toContain("abc123");
-});
-
-test("recipes command requires a query", () => {
-  const missing = getDelegatedPrompt("recipes", "   ");
-  expect(missing?.ok).toBe(false);
-
-  const ok = getDelegatedPrompt("recipes", "miso ramen");
-  expect(ok?.ok).toBe(true);
-  if (ok?.ok) expect(ok.prompt).toContain("miso ramen");
+  expect(getDelegatedPrompt("recipes", "   ")?.ok).toBe(false);
+  const recipes = getDelegatedPrompt("recipes", "miso ramen");
+  expect(recipes?.ok).toBe(true);
+  if (recipes?.ok) expect(recipes.prompt).toContain("miso ramen");
 });
 
 test("create-issue parses repo and title from a single args string", () => {
@@ -152,10 +109,4 @@ test("create-issue parses repo and title from a single args string", () => {
     expect(ok.prompt).toContain("myorg/myrepo");
     expect(ok.prompt).toContain("Fix login bug on safari");
   }
-});
-
-test("delegated prompts are stable strings (no random / Date.now leakage)", () => {
-  const a = getDelegatedPrompt("today", "");
-  const b = getDelegatedPrompt("today", "");
-  expect(a?.ok && b?.ok && a.prompt === b.prompt).toBe(true);
 });

@@ -83,14 +83,10 @@ test("a wrong, missing or malformed token, and an unknown host, all get the same
   expect(getTarget("host:rpi")).toBeUndefined();
 });
 
-test("a body whose host differs from the path gets 400", async () => {
-  const res = await send("rpi", { ...report, host: "macbook" });
-  expect(res.status).toBe(400);
-  expect(await res.json()).toMatchObject({ error: expect.stringContaining("differs") });
-  expect(metricRows()).toHaveLength(0);
-});
-
-test("a body that breaks the contract gets 400 with the reason, and stores nothing", async () => {
+test("a body that breaks the contract, or whose host differs from the path, gets 400 with the reason, and stores nothing", async () => {
+  const differs = await send("rpi", { ...report, host: "macbook" });
+  expect(differs.status).toBe(400);
+  expect(await differs.json()).toMatchObject({ error: expect.stringContaining("differs") });
   const { cpu_pct: _cpu, ...withoutCpu } = report.metrics;
   const bad = [
     { ...report, metrics: withoutCpu },
@@ -113,9 +109,7 @@ test("a report over 1 MB gets 413, although the app parses 40 MB elsewhere", asy
   expect(JSON.stringify(big).length).toBeGreaterThan(1_048_576);
   expect((await send("rpi", big)).status).toBe(413);
   expect(metricRows()).toHaveLength(0);
-});
-
-test("a report the size of a busy host's (64 KB, dozens of containers) is accepted", async () => {
+  // A report the size of a busy host's (64 KB, dozens of containers) is accepted.
   const busy = { ...report, containers: Array.from({ length: 40 }, (_, i) => ({ ...report.containers[0], Names: `c${i}`, Labels: "k=v,".repeat(100) })) };
   expect(JSON.stringify(busy).length).toBeGreaterThan(20_000);
   expect((await send("rpi", busy)).status).toBe(204);
@@ -158,9 +152,7 @@ test("a new token replaces the old one", async () => {
 test("hosts that need no agent, and bad names, get no token", async () => {
   for (const host of ["mini", "ha", "Bad_Name", "-x"]) expect((await issue(host)).status).toBe(400);
   expect(getSecret("MONITOR_HOST_TOKEN_MINI")).toBeNull();
-});
-
-test("a dashed host name maps to an underscored setting", () => {
+  // A dashed host name maps to an underscored setting.
   expect(tokenSetting("living-room-pi")).toBe("MONITOR_HOST_TOKEN_LIVING_ROOM_PI");
 });
 
@@ -190,13 +182,10 @@ test("tiles list this machine and the known hosts that reported, in order, with 
   });
   expect(hosts[1].metrics).not.toHaveProperty("battery");
   expect(hosts[0].metrics).toEqual({ cpu: null, mem: null, disk: null });
-});
-
-test("a host with another name that reports gets its own tile", async () => {
+  // A host with another name that reports gets its own tile.
   saveSecret(tokenSetting("garage-pi"), "garage-0123456789abcdefghijkl");
   await send("garage-pi", { ...report, host: "garage-pi" }, "garage-0123456789abcdefghijkl");
-  const tiles = buildHostTiles(Date.now()).hosts;
-  expect(tiles.map((h) => h.host)).toEqual(["mini", "garage-pi"]);
+  expect(buildHostTiles(Date.now()).hosts.map((h) => h.host)).toEqual(["mini", "rpi", "garage-pi"]);
   deleteSecret(tokenSetting("garage-pi"));
 });
 

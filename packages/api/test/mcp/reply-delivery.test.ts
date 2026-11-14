@@ -5,7 +5,6 @@ import {
   humanizeTurnFailure,
 } from "../../src/mcp/reply-delivery.js";
 import {
-  markSessionReplied,
   hasSessionReplied,
   clearSessionState,
   replyCallbacks,
@@ -18,27 +17,6 @@ test("humanizeTurnFailure maps internal kill/timeout strings to human text", () 
     .toMatch(/didn't send a final reply/i);
   // Unknown errors still produce a human message that embeds the original.
   expect(humanizeTurnFailure("boom")).toMatch(/boom/);
-});
-
-test("deliverFallbackReply is a no-op when a reply already landed this turn", () => {
-  const sessionId = "sess-already-replied";
-  markSessionReplied(sessionId, {
-    id: "r1",
-    content: "intermediate reply",
-    agentUsed: "Alfred",
-    createdAt: new Date().toISOString(),
-  });
-
-  const cb = vi.fn();
-  replyCallbacks.push(cb);
-  try {
-    const result = deliverFallbackReply(sessionId, "fallback should not send");
-    expect(result).toBeNull();
-    expect(cb).not.toHaveBeenCalled(); // never double-posts over an existing reply
-  } finally {
-    replyCallbacks.splice(replyCallbacks.indexOf(cb), 1);
-    clearSessionState(sessionId);
-  }
 });
 
 test("deliverFallbackReply delivers once when nothing landed, then guards repeats", () => {

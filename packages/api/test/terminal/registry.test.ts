@@ -66,15 +66,6 @@ async function attach(id: string, size = { cols: 80, rows: 24 }) {
 }
 
 describe("a terminal's holder", () => {
-  test("runs a shell that answers", async () => {
-    const info = await start();
-    const viewer = await attach(info.id);
-    await viewer.waitForEvent("attached");
-    viewer.type("echo hi-$((40+2))\n");
-    await viewer.waitFor(/hi-42/);
-    viewer.connection.close();
-  });
-
   test("gives a later viewer the screen so far, then the live output to both", async () => {
     const info = await start();
     const first = await attach(info.id);

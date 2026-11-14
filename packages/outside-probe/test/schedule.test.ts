@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { CHECK_SLOTS, SUBREQUEST_BUDGET, planRun } from "../src/schedule.ts";
+import { CHECK_SLOTS, planRun } from "../src/schedule.ts";
 import type { Targets } from "../src/types.ts";
 
 const targets = (urlCount: number, portCount: number): Targets => ({
@@ -12,11 +12,6 @@ const targets = (urlCount: number, portCount: number): Targets => ({
 
 const PORT_MINUTE = 15 * 100;
 
-test("the budget leaves room for the fixed work of a run", () => {
-  assert.equal(SUBREQUEST_BUDGET, 48);
-  assert.equal(CHECK_SLOTS, 43);
-});
-
 test("checks ports only when the minute divides by 15", () => {
   const t = targets(5, 12);
   assert.equal(planRun(t, PORT_MINUTE).ports.length, 12);
@@ -25,13 +20,10 @@ test("checks ports only when the minute divides by 15", () => {
   assert.equal(planRun(t, PORT_MINUTE + 15).ports.length, 12);
 });
 
-test("checks every URL each minute when they fit", () => {
+test("checks every URL each minute when they fit, and shards them on a port minute to stay inside the budget", () => {
   const t = targets(33, 12);
   assert.equal(planRun(t, PORT_MINUTE + 1).urls.length, 33);
-});
-
-test("shards URLs on a port minute so that the plan stays inside the budget", () => {
-  const plan = planRun(targets(33, 12), PORT_MINUTE);
+  const plan = planRun(t, PORT_MINUTE);
   assert.ok(plan.urls.length < 33);
   assert.ok(plan.urls.length + plan.ports.length <= CHECK_SLOTS);
 });

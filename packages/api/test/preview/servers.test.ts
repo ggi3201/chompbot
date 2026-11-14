@@ -27,12 +27,9 @@ afterEach(async () => {
 });
 
 describe("readLaunchConfigs", () => {
-  test("reads Claude Code's format", () => {
+  test("reads Claude Code's format; a project without the file has no configurations", () => {
     const dir = project([{ name: "web", runtimeExecutable: "pnpm", runtimeArgs: ["dev"], port: 5173 }]);
     expect(readLaunchConfigs(dir)).toEqual([{ name: "web", runtimeExecutable: "pnpm", runtimeArgs: ["dev"], port: 5173, url: undefined, cwd: undefined, env: {}, autoPort: false }]);
-  });
-
-  test("a project without the file has no configurations", () => {
     expect(readLaunchConfigs(mkdtempSync(join(tmpdir(), "chomp-preview-")))).toEqual([]);
   });
 

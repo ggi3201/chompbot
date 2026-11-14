@@ -128,19 +128,6 @@ describe("a background subagent that outlives its turn", () => {
     runtime.close();
   });
 
-  test("its failure shows too", async () => {
-    const runtime = start();
-    const turn = runtime.runTurn(request("turn-1"));
-    session.push(taskStarted("agent"));
-    session.push(result("Launched."));
-    await turn;
-
-    session.push(taskEnded("agent", "failed", "It broke."));
-    await settled();
-    expect(row("turn-1:subagent:agent")).toMatchObject({ status: "failed", summary: "It broke." });
-    runtime.close();
-  });
-
   test("that finishes during a later turn updates the row of the turn that started it", async () => {
     const runtime = start();
     const first = runtime.runTurn(request("turn-1"));

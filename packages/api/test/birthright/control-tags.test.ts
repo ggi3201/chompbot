@@ -30,21 +30,23 @@ Alex lives in Example City.
 </user_profile>`;
 
 describe("ControlTagParser", () => {
-  it.each([1, 2, 3, 7, 40, REPLY.length])("reads the same reply however the stream cuts it (%i characters at a time)", (size) => {
-    const events = run(REPLY, size);
+  it("reads the same reply however the stream cuts it", () => {
+    for (const size of [1, 2, 3, 7, 40, REPLY.length]) {
+      const events = run(REPLY, size);
 
-    expect(joined(events, "text").trim()).toBe("Vega it is.\n\n\nWhich one?\n\nHere I am.");
-    expect(events.filter((e) => e.type === "choice")).toEqual([
-      { type: "choice", options: ["Done.", "All done, and here is why."] },
-    ]);
-    expect(events.filter((e) => e.type === "facet")).toEqual([
-      { type: "facet", key: "name", value: "Vega" },
-      { type: "facet", key: "voice", value: "Short and dry." },
-    ]);
-    expect(events.find((e) => e.type === "soul_start")).toEqual({ type: "soul_start", name: "Vega", description: "Keeps Alex shipping." });
-    expect(joined(events, "soul_delta").trim()).toBe("You are Vega.");
-    expect(joined(events, "profile_delta").trim()).toBe("Alex lives in Example City.");
-    expect(events.at(-1)).toEqual({ type: "profile_end" });
+      expect(joined(events, "text").trim()).toBe("Vega it is.\n\n\nWhich one?\n\nHere I am.");
+      expect(events.filter((e) => e.type === "choice")).toEqual([
+        { type: "choice", options: ["Done.", "All done, and here is why."] },
+      ]);
+      expect(events.filter((e) => e.type === "facet")).toEqual([
+        { type: "facet", key: "name", value: "Vega" },
+        { type: "facet", key: "voice", value: "Short and dry." },
+      ]);
+      expect(events.find((e) => e.type === "soul_start")).toEqual({ type: "soul_start", name: "Vega", description: "Keeps Alex shipping." });
+      expect(joined(events, "soul_delta").trim()).toBe("You are Vega.");
+      expect(joined(events, "profile_delta").trim()).toBe("Alex lives in Example City.");
+      expect(events.at(-1)).toEqual({ type: "profile_end" });
+    }
   });
 
   it("keeps angle brackets that are not its tags", () => {
@@ -59,13 +61,10 @@ describe("ControlTagParser", () => {
     ]);
   });
 
-  it("closes a soul the stream cut off, so the page never waits forever", () => {
+  it("closes a soul the stream cut off, so the page never waits forever, and drops a cut-off facet or choice", () => {
     const events = run('<soul name="Vega" description="d">You are', 5);
     expect(joined(events, "soul_delta")).toBe("You are");
     expect(events.at(-1)).toEqual({ type: "soul_end" });
-  });
-
-  it("drops a facet or choice the stream cut off", () => {
     expect(run('<facet key="voice">Short', 4)).toEqual([]);
     expect(run("<choice><option>One</option>", 4)).toEqual([]);
   });

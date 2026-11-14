@@ -89,37 +89,27 @@ describe("cause", () => {
     expect(busEvents.filter((e) => e.type === "monitoring.incident.opened")).toHaveLength(1);
   });
 
-  test("when every service behind Traefik is down, Traefik is the cause, even with no target of its own", () => {
-    addTarget({ key: "x", status: "down", dependsOn: ["host:mini", "infra:traefik"] });
-    addTarget({ key: "y", status: "down", dependsOn: ["host:mini", "infra:traefik"] });
-    addTarget({ key: "lan", status: "up", dependsOn: ["host:mini"] });
-    down("x", at(0));
-    down("x", at(60));
-    expect(all()[0]).toMatchObject({ causeKey: "infra:traefik", title: "Traefik is down" });
-    expect(getIncident(all()[0].id)?.cause).toBe("Traefik");
-  });
-
-  test("the host wins over Traefik and the tunnel when everything on it is down", () => {
-    for (const key of ["x", "y"]) addTarget({ key, status: "down", dependsOn: ["host:mini", "infra:traefik", "infra:tunnel"] });
-    down("x", at(0));
-    down("x", at(60));
-    expect(all()[0]).toMatchObject({ causeKey: "host:mini", title: "Everything on mini is down" });
-  });
-
-  test("the tunnel is the cause when only the services behind it are down", () => {
-    for (const key of ["x", "y"]) addTarget({ key, status: "down", dependsOn: ["host:mini", "infra:traefik", "infra:tunnel"] });
-    addTarget({ key: "z", status: "up", dependsOn: ["host:mini", "infra:traefik"] });
-    down("x", at(0));
-    down("x", at(60));
-    expect(all()[0]).toMatchObject({ causeKey: "infra:tunnel", title: "Cloudflare tunnel is down" });
-  });
-
-  test("one service down behind a working Traefik is its own cause", () => {
-    addTarget({ key: "x", status: "down", dependsOn: ["host:mini", "infra:traefik"] });
-    addTarget({ key: "y", status: "up", dependsOn: ["host:mini", "infra:traefik"] });
-    down("x", at(0));
-    down("x", at(60));
-    expect(all()[0]).toMatchObject({ causeKey: "x", title: "x is down" });
+  test("the cause is the deepest shared dependency that is fully down: Traefik, the host, the tunnel, or the service itself", () => {
+    const traefik = ["host:mini", "infra:traefik"];
+    const tunnel = [...traefik, "infra:tunnel"];
+    const cases = [
+      // Traefik is the cause even with no target of its own.
+      { targets: [{ key: "x", status: "down", dependsOn: traefik }, { key: "y", status: "down", dependsOn: traefik }, { key: "lan", status: "up", dependsOn: ["host:mini"] }], causeKey: "infra:traefik", title: "Traefik is down", cause: "Traefik" },
+      // The host wins over Traefik and the tunnel when everything on it is down.
+      { targets: [{ key: "x", status: "down", dependsOn: tunnel }, { key: "y", status: "down", dependsOn: tunnel }], causeKey: "host:mini", title: "Everything on mini is down" },
+      // The tunnel, when only the services behind it are down.
+      { targets: [{ key: "x", status: "down", dependsOn: tunnel }, { key: "y", status: "down", dependsOn: tunnel }, { key: "z", status: "up", dependsOn: traefik }], causeKey: "infra:tunnel", title: "Cloudflare tunnel is down" },
+      // One service down behind a working Traefik is its own cause.
+      { targets: [{ key: "x", status: "down", dependsOn: traefik }, { key: "y", status: "up", dependsOn: traefik }], causeKey: "x", title: "x is down" },
+    ] as const;
+    for (const { targets, causeKey, title, ...rest } of cases) {
+      clearMonitoring();
+      for (const target of targets) addTarget({ ...target, dependsOn: [...target.dependsOn] });
+      down("x", at(0));
+      down("x", at(60));
+      expect(all()[0]).toMatchObject({ causeKey, title });
+      if ("cause" in rest) expect(getIncident(all()[0].id)?.cause).toBe(rest.cause);
+    }
   });
 });
 

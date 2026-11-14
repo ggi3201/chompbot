@@ -71,7 +71,7 @@ test("a notice falls back to the final text, and stays quiet with nothing to say
   expect(notify).not.toHaveBeenCalled();
 });
 
-test("a run that ends on [SILENT] sends nothing", async () => {
+test("a run that ends on exactly [SILENT] sends nothing", async () => {
   await expect(sendTurnNotice(noticeFor(insertChat()), " [SILENT]\n")).resolves.toBeUndefined();
 
   const id = insertChat();
@@ -79,9 +79,8 @@ test("a run that ends on [SILENT] sends nothing", async () => {
   await expect(sendTurnNotice(noticeFor(id), "[SILENT]")).resolves.toBeUndefined();
 
   expect(notify).not.toHaveBeenCalled();
-});
 
-test("only an exact [SILENT] keeps a run quiet", async () => {
+  // Only an exact [SILENT] keeps a run quiet.
   await expect(sendTurnNotice(noticeFor(insertChat()), "Oslo is closed, so [SILENT] today")).resolves.toBe("Oslo is closed, so [SILENT] today");
   expect(notify).toHaveBeenCalledTimes(1);
 });

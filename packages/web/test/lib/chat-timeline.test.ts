@@ -51,20 +51,13 @@ describe("subagents in the timeline", () => {
 });
 
 describe("upsertItems", () => {
-  it("replaces an item by id and keeps seq order", () => {
+  it("replaces an item by id, keeps seq order, ignores an older copy, and tracks the highest seq", () => {
     const first = [tool("a", 1, 1, { status: "running" }), tool("b", 2, 2)];
     const next = upsertItems(first, [tool("a", 3, 1, { status: "completed" })]);
     expect(next.map((i) => i.id)).toEqual(["b", "a"]);
     expect(next.find((i) => i.id === "a")).toMatchObject({ status: "completed", seq: 3 });
-  });
-
-  it("ignores an older copy of an item it already has", () => {
-    const current = [tool("a", 5, 1, { status: "completed" })];
-    expect(upsertItems(current, [tool("a", 2, 1, { status: "running" })])).toBe(current);
-  });
-
-  it("tracks the highest seq", () => {
-    expect(maxSeq([tool("a", 4, 1), tool("b", 9, 2)])).toBe(9);
+    expect(upsertItems(next, [tool("a", 2, 1, { status: "running" })])).toBe(next);
+    expect(maxSeq(next)).toBe(3);
     expect(maxSeq([])).toBe(0);
   });
 });
@@ -78,23 +71,22 @@ describe("buildTimeline", () => {
     expect(entries.map((e) => e.type)).toEqual(["message", "item", "work", "message"]);
   });
 
-  it("shows only the footer of an assistant message an item of its turn already shows", () => {
+  it("shows only the footer of an assistant message an item of its turn already shows, and keeps any other", () => {
     const entries = buildTimeline(
       [message("assistant", "  Done.  ", 9, "t1")],
       [text("x", 1, 5, "Done.")],
     );
     expect(entries.map((e) => e.type)).toEqual(["item", "footer"]);
-  });
 
-  it("keeps messages without a turn id, or from another turn, or with other text", () => {
-    const entries = buildTimeline(
+    // Messages without a turn id, or from another turn, or with other text stay.
+    const kept = buildTimeline(
       [message("assistant", "Done.", 7), message("assistant", "Done.", 8, "t2"), message("assistant", "Other", 9, "t1")],
       [text("x", 1, 5, "Done.")],
     );
-    expect(entries.filter((e) => e.type === "message")).toHaveLength(3);
+    expect(kept.filter((e) => e.type === "message")).toHaveLength(3);
   });
 
-  it("groups consecutive work items of one turn and drops reply tool rows", () => {
+  it("groups consecutive work items of one turn, splits them across turns, and drops reply tool rows", () => {
     const entries = buildTimeline([], [
       tool("a", 1, 1),
       tool("r", 2, 2, { tool: "mcp__chomp-api__reply" }),
@@ -105,24 +97,19 @@ describe("buildTimeline", () => {
     expect(entries.map((e) => e.type)).toEqual(["work", "item", "work"]);
     const first = entries[0];
     expect(first.type === "work" && first.items.map((i) => i.id)).toEqual(["a", "b"]);
+    // Groups split across turns.
+    expect(buildTimeline([], [tool("a", 1, 1), { ...tool("b", 2, 2), turnId: "t2" } as ChatItem])).toHaveLength(2);
   });
 
-  it("splits work groups across turns", () => {
-    const entries = buildTimeline([], [tool("a", 1, 1), { ...tool("b", 2, 2), turnId: "t2" } as ChatItem]);
-    expect(entries).toHaveLength(2);
-  });
-
-  it("marks a group live while its turn runs or an item is running", () => {
+  it("marks a group live while its turn runs or an item is running, and finds the live turn", () => {
     const items = [tool("a", 1, 1)];
     expect(buildTimeline([], items, "t1")[0]).toMatchObject({ live: true });
     expect(buildTimeline([], items)[0]).toMatchObject({ live: false });
     expect(buildTimeline([], [tool("a", 1, 1, { status: "running" })])[0]).toMatchObject({ live: true });
-  });
-
-  it("finds the live turn only while a request is open", () => {
-    const items = [tool("a", 1, 1), { ...tool("b", 2, 2), turnId: "t2" } as ChatItem];
-    expect(liveTurnId(items, true)).toBe("t2");
-    expect(liveTurnId(items, false)).toBeUndefined();
+    // The live turn is the latest one, and only while a request is open.
+    const twoTurns = [tool("a", 1, 1), { ...tool("b", 2, 2), turnId: "t2" } as ChatItem];
+    expect(liveTurnId(twoTurns, true)).toBe("t2");
+    expect(liveTurnId(twoTurns, false)).toBeUndefined();
   });
 });
 
@@ -142,7 +129,7 @@ describe("summarizeWork", () => {
 });
 
 describe("parseUnifiedDiff", () => {
-  it("numbers lines from the hunk header", () => {
+  it("numbers lines from the hunk header, or from line 1 without one", () => {
     const lines = parseUnifiedDiff("@@ -10,3 +10,3 @@ fn\n keep\n-old\n+new\n\\ No newline at end of file\n");
     expect(lines).toEqual([
       { kind: "hunk", text: "@@ -10,3 +10,3 @@ fn" },
@@ -151,9 +138,7 @@ describe("parseUnifiedDiff", () => {
       { kind: "add", text: "new", newLine: 11 },
       { kind: "meta", text: "\\ No newline at end of file" },
     ]);
-  });
-
-  it("counts from line 1 without a hunk header", () => {
+    // Without a hunk header it counts from line 1.
     expect(parseUnifiedDiff("+a\n+b")).toEqual([
       { kind: "add", text: "a", newLine: 1 },
       { kind: "add", text: "b", newLine: 2 },

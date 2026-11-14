@@ -102,22 +102,20 @@ const post = (path: string, body: unknown) =>
   fetch(`${url}${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 
 describe("waitForApproval", () => {
-  test("outside web chat, no phone means nobody can answer: it expires at once", async () => {
+  test("expires at once when nobody can answer: no phone, a one-off run, or a failed push", async () => {
+    // outside web chat, no phone means nobody can answer
     await expect(waitForApproval(turn(), "r1", "Run ls", () => {})).resolves.toBe("expired");
     expect(apns.sendAlertPush).not.toHaveBeenCalled();
-  });
 
-  test("outside web chat, a failed push expires it at once", async () => {
-    addPhone();
-    apns.sendAlertPush.mockImplementation(async () => ({ ok: false, error: "APNs not configured" }));
-    await expect(waitForApproval(turn(), "r1", "Run ls", () => {})).resolves.toBe("expired");
-    expect(apns.sendSilentPush).not.toHaveBeenCalled();
-  });
-
-  test("a one-off run has no conversation to answer through", async () => {
+    // a one-off run has no conversation to answer through
     addPhone();
     await expect(waitForApproval(turn({ conversationId: "" }), "r1", "Run ls", () => {})).resolves.toBe("expired");
     expect(apns.sendAlertPush).not.toHaveBeenCalled();
+
+    // outside web chat, a failed push expires it at once
+    apns.sendAlertPush.mockImplementation(async () => ({ ok: false, error: "APNs not configured" }));
+    await expect(waitForApproval(turn(), "r1", "Run ls", () => {})).resolves.toBe("expired");
+    expect(apns.sendSilentPush).not.toHaveBeenCalled();
   });
 
   test("web chat survives a phone that cannot be reached, until the timeout", async () => {
@@ -259,19 +257,22 @@ describe("ask_user on the phone", () => {
 });
 
 describe("lock screen summaries", () => {
-  test.each([
-    ["git push origin main", "Run git push …"],
-    ["ls", "Run ls"],
-    ["/usr/bin/git status", "Run git status"],
-    ["rm -rf /", "Run rm …"],
-    ["curl -H 'Authorization: Bearer secret' https://x.y", "Run curl …"],
-    ["API_KEY=secret npm publish", "Run npm publish"],
-    ["cd repo && rm -rf build", "Run a command"],
-    ["echo $SECRET", "Run a command"],
-    ['KEY="a b" npm test', "Run a command"],
-  ])("%s", (command, summary) => {
-    expect(claudeApprovalSummary("Bash", { command })).toBe(summary);
-    expect(codexApprovalSummary("Run command", command.split(" "))).toBe(summary);
+  test("commands show only the program and safe words, never secrets", () => {
+    const cases: Array<[string, string]> = [
+      ["git push origin main", "Run git push …"],
+      ["ls", "Run ls"],
+      ["/usr/bin/git status", "Run git status"],
+      ["rm -rf /", "Run rm …"],
+      ["curl -H 'Authorization: Bearer secret' https://x.y", "Run curl …"],
+      ["API_KEY=secret npm publish", "Run npm publish"],
+      ["cd repo && rm -rf build", "Run a command"],
+      ["echo $SECRET", "Run a command"],
+      ['KEY="a b" npm test', "Run a command"],
+    ];
+    for (const [command, summary] of cases) {
+      expect(claudeApprovalSummary("Bash", { command }), command).toBe(summary);
+      expect(codexApprovalSummary("Run command", command.split(" ")), command).toBe(summary);
+    }
   });
 
   test("files by name, pages by host, other tools by name, and never their input", () => {

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/icon.png" width="112" alt="Chomp's icon: an amber C on graphite">
+  <img src="packages/web/public/favicon-512.png" width="112" alt="Chomp's logo: a white square with a bite taken out">
 </p>
 
 <h1 align="center">Chomp</h1>
@@ -13,7 +13,7 @@
   <a href="https://github.com/ggi3201/chompbot/actions/workflows/ci.yml"><img src="https://github.com/ggi3201/chompbot/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-f2a33a" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/node-22%20%7C%2024-3c873a" alt="Node 22 or 24">
-  <img src="https://img.shields.io/badge/tests-1%2C300%2B-2ea44f" alt="1,300+ tests">
+  <img src="https://img.shields.io/badge/tests-990%2B-2ea44f" alt="990+ tests">
   <img src="https://img.shields.io/badge/iOS-SwiftUI-0a84ff" alt="iOS app in SwiftUI">
 </p>
 
@@ -102,7 +102,7 @@ Build it with Xcode and XcodeGen, using your own bundle ID and team
 
 ## Tested
 
-Around 1,300 tests: 1,100 for the API, 140 for the web app, 74 XCTests for the iOS
+About 990 tests: 800 for the API, 73 for the web app, 74 XCTests for the iOS
 app, and suites for the CLI and the outside probe. Every push and pull request runs
 the build, a type check and the tests on Node 22 and 24
 ([`ci.yml`](.github/workflows/ci.yml)).

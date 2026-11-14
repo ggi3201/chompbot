@@ -24,22 +24,16 @@ beforeAll(async () => {
 afterAll(() => site.close());
 beforeEach(() => { status = 200; clearMonitoring(); });
 
-test("http: any answer below 500 is up, and a redirect is not followed", async () => {
+test("http: any answer below 500 is up and a redirect is not followed; 500 and above is down unless expected; a refused connection is down with a reason", async () => {
   for (const code of [200, 401, 404]) {
     status = code;
     expect(await checkHttp(`${site.url}/status`, null)).toMatchObject({ ok: true, statusCode: code });
   }
   expect(await checkHttp(`${site.url}/redirect`, null)).toMatchObject({ ok: true, statusCode: 302 });
-});
-
-test("http: 500 and above is down, unless the target expects that status", async () => {
   status = 503;
   expect(await checkHttp(`${site.url}/status`, null)).toMatchObject({ ok: false, statusCode: 503, error: "HTTP 503" });
   expect(await checkHttp(`${site.url}/status`, 502)).toMatchObject({ ok: false });
   expect(await checkHttp(`${site.url}/status`, 503)).toMatchObject({ ok: true, statusCode: 503 });
-});
-
-test("http: a refused connection is down with a reason", async () => {
   const result = await checkHttp("http://127.0.0.1:1/", null);
   expect(result.ok).toBe(false);
   expect(result.error).toBeTruthy();
@@ -54,13 +48,10 @@ test("tcp: up when the port accepts a connection, down when it does not", async 
   expect(await checkTcp("127.0.0.1", port)).toMatchObject({ ok: false });
 });
 
-test("ping: reads the latency from the reply, and runs ping without a shell", async () => {
+test("ping: reads the latency from the reply and runs ping without a shell; no reply is down, and a host that looks like an option is refused", async () => {
   child.exec.mockResolvedValue({ stdout: "64 bytes from 10.0.0.1: icmp_seq=0 ttl=64 time=0.612 ms\n", stderr: "" });
   expect(await checkPing("10.0.0.1")).toEqual({ ok: true, statusCode: null, latencyMs: 1, error: null });
   expect(child.exec).toHaveBeenCalledWith("ping", expect.arrayContaining(["-c", "1", "10.0.0.1"]), expect.anything());
-});
-
-test("ping: no reply is down, and a host that looks like an option is refused", async () => {
   child.exec.mockRejectedValue(new Error("exit 1"));
   expect(await checkPing("10.0.0.1")).toMatchObject({ ok: false, error: "No ping reply" });
   child.exec.mockClear();
@@ -80,19 +71,20 @@ test("runCheck picks the check by kind and reports a target that lacks what it n
   expect(await runCheck({ ...addTarget({ key: "a", kind: "http" }) })).toMatchObject({ ok: false, error: "No URL" });
   expect(await runCheck({ ...addTarget({ key: "b", kind: "tcp" }) })).toMatchObject({ ok: false, error: "No host or port" });
   expect(await runCheck({ ...addTarget({ key: "c", kind: "ping" }) })).toMatchObject({ ok: false, error: "No host" });
+  expect(await runCheck(addTarget({ key: "d", kind: "container" }))).toMatchObject({ ok: false, error: "No container" });
+  child.execFile.mockImplementationOnce((_c: string, _args: string[], _o: unknown, cb: (e: null, out: string, err: string) => void) => cb(null, "running healthy\n", ""));
+  expect(await runCheck(addTarget({ key: "e", kind: "container", container: "langfuse-postgres" }))).toMatchObject({ ok: true });
+  expect(child.execFile).toHaveBeenCalledWith("docker", ["inspect", "--format", expect.any(String), "langfuse-postgres"], expect.anything(), expect.any(Function));
 });
 
 const info = (ip: string | null) => ({ state: "running", health: null, restarts: 0, oomKilled: false, ip });
 
-test("a URL that names the target's container goes to the container's address, keeping port, path and query", () => {
+test("a URL that names the target's container goes to the container's address, keeping port, path and query; otherwise it is left as it is", () => {
   const target = { url: "http://shop-app-app-1:8080/health?x=1", container: "shop-app-app-1", containerInfo: info("172.18.0.9") };
   expect(viaContainerAddress(target)).toBe("http://172.18.0.9:8080/health?x=1");
   expect(viaContainerAddress({ ...target, url: "http://shop-app-app-1/" })).toBe("http://172.18.0.9/");
-});
-
-test("a URL is left as it is when its host is not the container, or the container has no address", () => {
-  const target = { url: "https://apps.example.net/", container: "shop-app-app-1", containerInfo: info("172.18.0.9") };
-  expect(viaContainerAddress(target)).toBeNull();
+  // Left as it is when its host is not the container, or the container has no address.
+  expect(viaContainerAddress({ ...target, url: "https://apps.example.net/" })).toBeNull();
   expect(viaContainerAddress({ ...target, url: "http://shop-app-app-1/", containerInfo: info(null) })).toBeNull();
   expect(viaContainerAddress({ ...target, url: "http://shop-app-app-1/", containerInfo: null })).toBeNull();
   expect(viaContainerAddress({ ...target, url: "http://shop-app-app-1/", container: null })).toBeNull();
@@ -131,11 +123,4 @@ test("container: up while it runs and is healthy; down when stopped, unhealthy o
   expect(await checkContainer("db")).toMatchObject({ ok: false, error: "docker is not installed" });
   child.execFile.mockImplementationOnce((_c: string, _a: string[], _o: unknown, cb: (e: Error, out: string, err: string) => void) => cb(new Error("x"), "", "Error: No such object: gone\n"));
   expect(await checkContainer("gone")).toMatchObject({ ok: false, error: "Error: No such object: gone" });
-});
-
-test("runCheck runs a container target by its name", async () => {
-  child.execFile.mockImplementationOnce((_c: string, args: string[], _o: unknown, cb: (e: null, out: string, err: string) => void) => cb(null, "running healthy\n", ""));
-  expect(await runCheck(addTarget({ key: "c", kind: "container", container: "langfuse-postgres" }))).toMatchObject({ ok: true });
-  expect(child.execFile).toHaveBeenCalledWith("docker", ["inspect", "--format", expect.any(String), "langfuse-postgres"], expect.anything(), expect.any(Function));
-  expect(await runCheck(addTarget({ key: "d", kind: "container" }))).toMatchObject({ ok: false, error: "No container" });
 });

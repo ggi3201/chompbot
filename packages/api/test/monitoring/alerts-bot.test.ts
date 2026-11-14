@@ -50,17 +50,13 @@ test("a diagnosis that is already running, or an incident that is gone, is answe
   expect(gone.answerCallbackQuery).toHaveBeenCalledWith({ text: "That incident is gone." });
 });
 
-test("anyone but the owner gets no answer and starts nothing", async () => {
+test("anyone but the owner gets no answer and starts nothing, and with no owner set nobody is answered", async () => {
   configure();
   for (const from of [OWNER + 1, undefined]) {
     const { ctx, answerCallbackQuery } = tap(from);
     await handleDiagnoseButton(ctx);
     expect(answerCallbackQuery).not.toHaveBeenCalled();
   }
-  expect(diagnose.startDiagnosis).not.toHaveBeenCalled();
-});
-
-test("with no owner set, nobody is answered", async () => {
   configure({ owner: "" });
   const { ctx, answerCallbackQuery } = tap(OWNER);
   await handleDiagnoseButton(ctx);

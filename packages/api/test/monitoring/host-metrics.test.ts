@@ -26,42 +26,33 @@ describe("host warning rules", () => {
   const reading = (over: Partial<HostReading>): HostReading => ({ host: "mini", title: "mini", diskPct: 50, memory: [], ...over });
   const evaluate = (over: Partial<HostReading>) => evaluateHostWarnings([reading(over)], NOW);
 
-  test("disk over 85% is a warning, 85% exactly is not", () => {
+  test("disk over 85% is a warning and over 92% its critical kind; 85%, 92% exactly and no readings are not", () => {
     expect(evaluate({ diskPct: 85 })).toEqual([]);
     expect(evaluate({ diskPct: 85.1 })).toEqual([{ key: "host-disk:mini", kind: "host-disk", targetKey: "host:mini", text: "mini disk is 85% full." }]);
-  });
-
-  test("disk over 92% is the critical kind of the same warning, so it takes the place of the lesser one", () => {
     expect(evaluate({ diskPct: 92 })[0].kind).toBe("host-disk");
     expect(evaluate({ diskPct: 92.1 })).toMatchObject([{ key: "host-disk:mini", kind: "host-disk-critical", text: "mini disk is 92% full." }]);
-  });
-
-  test("memory over 90% for 10 minutes is a warning", () => {
-    expect(evaluate({ memory: samples(11, () => 93) })).toEqual([{
-      key: "host-memory:mini", kind: "host-memory", targetKey: "host:mini",
-      text: "mini memory is 93% used, and has been over 90% for 10 minutes.",
-    }]);
-  });
-
-  test("memory that has been high for 9 minutes is not yet, nor is a window with a dip or a reading at exactly 90%", () => {
-    expect(evaluate({ memory: samples(10, () => 99) })).toEqual([]);
-    expect(evaluate({ memory: samples(30, (ago) => (ago === 5 ? 80 : 95)) })).toEqual([]);
-    expect(evaluate({ memory: samples(30, () => 90) })).toEqual([]);
-  });
-
-  test("a dip that ended more than 10 minutes ago does not count", () => {
-    expect(evaluate({ memory: samples(30, (ago) => (ago === 20 ? 80 : 95)) })).toHaveLength(1);
-  });
-
-  test("memory over 97% on top of the 10 minutes is critical", () => {
-    expect(evaluate({ memory: samples(12, () => 98) })[0].kind).toBe("host-memory-critical");
-    expect(evaluate({ memory: samples(12, (ago) => (ago === 0 ? 98 : 92)) })[0].kind).toBe("host-memory-critical");
-    expect(evaluate({ memory: samples(12, () => 97) })[0].kind).toBe("host-memory");
-  });
-
-  test("a host with no readings gives nothing", () => {
     expect(evaluate({ diskPct: null, memory: [] })).toEqual([]);
   });
+
+  test("memory over 90% for 10 minutes is a warning and over 97% critical; 9 minutes, a recent dip or exactly 90% is not", () => {
+    {
+      expect(evaluate({ memory: samples(11, () => 93) })).toEqual([{
+        key: "host-memory:mini", kind: "host-memory", targetKey: "host:mini",
+        text: "mini memory is 93% used, and has been over 90% for 10 minutes.",
+      }]);
+      expect(evaluate({ memory: samples(10, () => 99) })).toEqual([]);
+      expect(evaluate({ memory: samples(30, (ago) => (ago === 5 ? 80 : 95)) })).toEqual([]);
+      expect(evaluate({ memory: samples(30, () => 90) })).toEqual([]);
+      // A dip that ended more than 10 minutes ago does not count.
+      expect(evaluate({ memory: samples(30, (ago) => (ago === 20 ? 80 : 95)) })).toHaveLength(1);
+    }
+    {
+      expect(evaluate({ memory: samples(12, () => 98) })[0].kind).toBe("host-memory-critical");
+      expect(evaluate({ memory: samples(12, (ago) => (ago === 0 ? 98 : 92)) })[0].kind).toBe("host-memory-critical");
+      expect(evaluate({ memory: samples(12, () => 97) })[0].kind).toBe("host-memory");
+    }
+  });
+
 });
 
 describe("host warnings in the database", () => {
@@ -115,14 +106,11 @@ describe("bucketing", () => {
   const shape = { bucketMs: 15 * MINUTE, count: 4 };
   const end = Math.floor(NOW / shape.bucketMs) * shape.bucketMs;
 
-  test("averages land in the bucket that ends the range at `now`, oldest first, and gaps are null", () => {
+  test("averages land in the bucket that ends the range at `now`, oldest first, gaps are null, and rows off the range or grid are ignored", () => {
     const rows = [{ bucket: end, value: 7 }, { bucket: end - 3 * shape.bucketMs, value: 1 }];
     expect(averagesByBucket(rows, shape, NOW)).toEqual([1, null, null, 7]);
-  });
-
-  test("rows outside the range or off the bucket grid are ignored", () => {
-    const rows = [{ bucket: end - 4 * shape.bucketMs, value: 9 }, { bucket: end + shape.bucketMs, value: 9 }, { bucket: end + 1, value: 9 }];
-    expect(averagesByBucket(rows, shape, NOW)).toEqual([null, null, null, null]);
+    const off = [{ bucket: end - 4 * shape.bucketMs, value: 9 }, { bucket: end + shape.bucketMs, value: 9 }, { bucket: end + 1, value: 9 }];
+    expect(averagesByBucket(off, shape, NOW)).toEqual([null, null, null, null]);
   });
 
   test("filling starts at the first reading, repeats the last reading across gaps, and fills a missing series with zeros", () => {
@@ -130,9 +118,7 @@ describe("bucketing", () => {
       start: 1,
       columns: { a: [2, 2, 4], b: [5, 5, 5], c: [0, 0, 0] },
     });
-  });
-
-  test("with no readings at all there is nothing to draw", () => {
+    // With no readings at all there is nothing to draw.
     expect(fillBuckets({ a: [null, null] })).toEqual({ start: 2, columns: { a: [] } });
     expect(fillBuckets({})).toEqual({ start: 0, columns: {} });
   });
@@ -194,6 +180,7 @@ describe("the series route's data", () => {
     expect(series.cpu[0]).toBe(5);
   });
 
+
   test("another host's readings do not leak into the series", () => {
     threeHours("rpi");
     expect(buildHostSeries("mini", "24h", NOW).times).toEqual([]);
@@ -246,22 +233,22 @@ describe("reading the mini's /proc", () => {
     // 1000 jiffies pass, 900 of them idle.
     expect(cpuPercent(before, { idle: before.idle + 900, total: before.total + 1000 })).toBe(10);
     expect(cpuPercent(before, before)).toBe(0);
-  });
-
-  test("a line that is not a cpu line gives nothing", () => {
+    // A line that is not a cpu line gives nothing.
     expect(parseCpuStat("")).toBeNull();
     expect(parseCpuStat("cpu  1 2")).toBeNull();
   });
 
-  test("memory used is total minus available, as the agents report it", () => {
-    expect(parseMeminfo(fixture("proc-meminfo.txt"))).toEqual({ mem_pct: 39, mem_used_gb: 11.38, mem_total_gb: 29.17 });
-    expect(parseMeminfo("MemTotal: 100 kB")).toBeNull();
+  test("memory used is total minus available, and disk used is used over used plus available, as the agents report them", () => {
+    {
+      expect(parseMeminfo(fixture("proc-meminfo.txt"))).toEqual({ mem_pct: 39, mem_used_gb: 11.38, mem_total_gb: 29.17 });
+      expect(parseMeminfo("MemTotal: 100 kB")).toBeNull();
+    }
+    {
+      expect(parseDf(fixture("df-root.txt"))).toEqual({ disk_pct: 41.4, disk_used_gb: 368.09, disk_total_gb: 936.79 });
+      expect(parseDf("")).toBeNull();
+    }
   });
 
-  test("disk used is used over used plus available, in the same units as the agents", () => {
-    expect(parseDf(fixture("df-root.txt"))).toEqual({ disk_pct: 41.4, disk_used_gb: 368.09, disk_total_gb: 936.79 });
-    expect(parseDf("")).toBeNull();
-  });
 
   test("on macOS memory is active + wired + compressed pages, and disk comes from df -P -k", () => {
     const vmStat = "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:  12612.\nPages active:  193642.\nPages wired down:  853283.\nPages occupied by compressor:  65536.\n";
@@ -313,18 +300,14 @@ describe("Home Assistant", () => {
       state("sensor.home_assistant_memory_use_percent", "52"),
       state("sensor.system_monitor_disk_use_percent", "41.2"),
     ])).toEqual({ cpu_pct: 7.5, mem_pct: 52, disk_pct: 41.2 });
-  });
-
-  test("with several disks the shortest sensor id, the main one, wins; unavailable sensors are skipped", () => {
+    // With several disks the shortest sensor id, the main one, wins; unavailable sensors are skipped.
     expect(readSensors([
       state("sensor.system_monitor_disk_use_percent_media", "90"),
       state("sensor.system_monitor_disk_use_percent", "41"),
       state("sensor.system_monitor_processor_use", "unavailable"),
       state("sensor.pi_processor_use", "12"),
     ])).toEqual({ disk_pct: 41, cpu_pct: 12 });
-  });
-
-  test("none of the 358 states of today's Home Assistant is a System Monitor sensor", () => {
+    // None of the 358 states of today's Home Assistant is a System Monitor sensor.
     expect(readSensors(plain)).toEqual({});
   });
 

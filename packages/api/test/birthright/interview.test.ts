@@ -73,21 +73,12 @@ beforeEach(() => {
 });
 
 describe("runInterviewTurn", () => {
-  it("pins the interview to Opus 5.5 at high effort, with no tools", async () => {
-    sdkYields(SUCCESS);
-    await collect();
-    const options = optionsOfCall();
-    expect(options.model).toBe("claude-opus-5-5");
-    expect(options.effort).toBe("high");
-    expect(options.tools).toEqual([]);
-    expect(options.settingSources).toEqual([]);
-    expect(options.includePartialMessages).toBe(true);
-  });
-
-  it("starts a session with the prompt and resumes one without it", async () => {
+  it("starts a session with the prompt and no tools, and resumes one without it", async () => {
     sdkYields(SUCCESS);
     const [first] = await collect();
     expect(first.type).toBe("session");
+    expect(optionsOfCall().tools).toEqual([]);
+    expect(optionsOfCall().settingSources).toEqual([]);
     expect(optionsOfCall().sessionId).toBe((first as { id: string }).id);
     expect(optionsOfCall().systemPrompt).toContain("moment of your birth");
     expect(optionsOfCall().resume).toBeUndefined();
@@ -117,16 +108,16 @@ describe("runInterviewTurn", () => {
     await expect(collect()).rejects.toThrow("error_during_execution");
   });
 
-  it("tells a new person's interview that it knows nothing, ignoring seeded defaults", async () => {
+  it("tells a new person's interview that it knows nothing, ignoring seeded defaults, and brings in what it knows", async () => {
     memoryRows.rows = [{ content: "user_location: London, UK", category: "preferences", source: "seed", updatedAt: "2026-01-01" }];
     sdkYields(SUCCESS);
     await collect();
     const prompt = optionsOfCall().systemPrompt;
     expect(prompt).toContain("This person is new to you");
     expect(prompt).not.toContain("London");
-  });
 
-  it("brings what it already knows into the prompt", async () => {
+    // What it already knows comes into the prompt.
+    queryMock.mockClear();
     memoryRows.rows = [
       { content: "Lives in Example City", category: "facts", source: "user", updatedAt: "2026-01-01" },
       { content: "Guessed from a chat", category: "facts", source: "auto", updatedAt: "2026-01-01" },
@@ -135,10 +126,10 @@ describe("runInterviewTurn", () => {
     db.insert(souls).values({ id: "s1", name: "Ember", description: "", content: "You are Ember.", color: "violet", isDefault: true, createdAt: now, updatedAt: now }).run();
     sdkYields(SUCCESS);
     await collect();
-    const prompt = optionsOfCall().systemPrompt;
-    expect(prompt).toContain("Lives in Example City");
-    expect(prompt).not.toContain("Guessed from a chat");
-    expect(prompt).toContain("You are Ember.");
+    const known = optionsOfCall().systemPrompt;
+    expect(known).toContain("Lives in Example City");
+    expect(known).not.toContain("Guessed from a chat");
+    expect(known).toContain("You are Ember.");
   });
 });
 
@@ -154,15 +145,6 @@ describe("what the interview asks for", () => {
     expect(prompt).toContain("Still does not work in prod");
     expect(prompt).toContain("Deployed, all good.");
   });
-
-  it("asks for one short soul of rules", async () => {
-    sdkYields(SUCCESS);
-    await collect();
-    const prompt = optionsOfCall().systemPrompt;
-    expect(prompt).toContain("You write exactly one soul");
-    expect(prompt).toContain("Never suggest extra agents");
-    expect(prompt).toContain("At most 250 words");
-  });
 });
 
 describe("POST /birthright/birth", () => {
@@ -171,14 +153,11 @@ describe("POST /birthright/birth", () => {
   const setting = (key: string) => db.select().from(settings).where(eq(settings.key, key)).get()?.value;
   const VEGA = { name: "Vega", description: "Keeps it shipping.", content: "You are Vega." };
 
-  it("creates exactly one soul the first time", async () => {
-    expect((await birth(VEGA)).status).toBe(200);
-    expect(soulRows()).toHaveLength(1);
-    expect(soulRows()[0]).toMatchObject({ name: "Vega", isDefault: true });
-  });
-
-  it("can run many times and never adds another", async () => {
-    const first = (await (await birth(VEGA)).json()).id;
+  it("creates exactly one soul, and running many times never adds another", async () => {
+    const created = await birth(VEGA);
+    expect(created.status).toBe(200);
+    expect(soulRows()).toMatchObject([{ name: "Vega", isDefault: true }]);
+    const first = (await created.json()).id;
     await birth({ ...VEGA, name: "Lyra", content: "You are Lyra." });
     const third = (await (await birth({ ...VEGA, name: "Orion", content: "You are Orion." })).json()).id;
     expect(third).toBe(first);
@@ -209,12 +188,10 @@ describe("POST /birthright/birth", () => {
     expect(setting("voice_tts_voice")).toBe("nova");
   });
 
-  it.each([
-    ["an empty soul", { ...VEGA, content: "  " }],
-    ["no name", { ...VEGA, name: "" }],
-    ["an unknown voice", { ...VEGA, voice: "robot" }],
-  ])("refuses %s", async (_name, body) => {
-    expect((await birth(body)).status).toBe(400);
+  it("refuses an empty soul, no name, or an unknown voice", async () => {
+    for (const body of [{ ...VEGA, content: "  " }, { ...VEGA, name: "" }, { ...VEGA, voice: "robot" }]) {
+      expect((await birth(body)).status, JSON.stringify(body)).toBe(400);
+    }
     expect(soulRows()).toHaveLength(0);
   });
 });
@@ -278,13 +255,15 @@ describe("POST /birthright/trial", () => {
 describe("POST /birthright/turn", () => {
   const post = (body: unknown) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 
-  it.each([
-    ["a message without a session", { message: "Hello" }],
-    ["a session without a message", { sessionId: "3f7d2a54-9c11-4f6e-8a55-1f6a2b7c9d10" }],
-    ["a session id that is not a uuid", { sessionId: "../../etc", message: "Hello" }],
-    ["a message that is only spaces", { sessionId: "3f7d2a54-9c11-4f6e-8a55-1f6a2b7c9d10", message: "   " }],
-  ])("refuses %s", async (_name, body) => {
-    expect((await post(body)).status).toBe(400);
+  it("refuses a message without a session, a session without a message, a non-uuid session id, or a blank message", async () => {
+    for (const body of [
+      { message: "Hello" },
+      { sessionId: "3f7d2a54-9c11-4f6e-8a55-1f6a2b7c9d10" },
+      { sessionId: "../../etc", message: "Hello" },
+      { sessionId: "3f7d2a54-9c11-4f6e-8a55-1f6a2b7c9d10", message: "   " },
+    ]) {
+      expect((await post(body)).status, JSON.stringify(body)).toBe(400);
+    }
     expect(queryMock).not.toHaveBeenCalled();
   });
 

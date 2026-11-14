@@ -34,7 +34,7 @@ beforeEach(() => {
 });
 
 describe("acceptMemories", () => {
-  it("keeps durable memories backed by a verbatim quote, and rejects the rest", () => {
+  it("keeps durable memories backed by a verbatim quote (ignoring case and whitespace), and rejects the rest", () => {
     const kept = acceptMemories(
       [
         pnpm,
@@ -50,11 +50,8 @@ describe("acceptMemories", () => {
 
     expect(kept.map((m) => m.content)).toEqual([pnpm.content, "unknown replacement", "from an earlier user turn"]);
     expect(kept[1].supersedes).toBeNull();
-  });
-
-  it("matches the quote ignoring case and whitespace", () => {
-    const kept = acceptMemories([{ ...pnpm, evidence: "ALWAYS  use pnpm\nin the chomp repo" }], input, new Set());
-    expect(kept).toHaveLength(1);
+    // The quote matches ignoring case and whitespace.
+    expect(acceptMemories([{ ...pnpm, evidence: "ALWAYS  use pnpm\nin the chomp repo" }], input, new Set())).toHaveLength(1);
   });
 });
 

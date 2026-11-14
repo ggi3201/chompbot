@@ -20,9 +20,14 @@ const lines = [
   "garbage line",
 ].join("\n");
 
-test("labels work and private calendars and drops non-busy ones", () => {
-  const slots = parsePhoneCalendar(lines);
-  expect(slots.map((s) => s.kind)).toEqual(["work", "private"]);
+test("labels work and private calendars and drops non-busy ones; work and skip names are configurable", () => {
+  expect(parsePhoneCalendar(lines).map((s) => s.kind)).toEqual(["work", "private"]);
+
+  vi.stubEnv("PHONE_CALENDAR_WORK_NAMES", " Family, Work@example.com ");
+  expect(parsePhoneCalendar(lines).map((slot) => slot.kind)).toEqual(["private", "work"]);
+
+  vi.stubEnv("PHONE_CALENDAR_SKIP_NAMES", "");
+  expect(parsePhoneCalendar(lines)).toHaveLength(4);
 });
 
 test("lists only slots inside the window, without titles", () => {
@@ -31,16 +36,6 @@ test("lists only slots inside the window, without titles", () => {
   expect(text).toContain("09:00 to 10:00: work");
   expect(text).not.toContain("private");
   expect(phoneBusyText("2026-11-12T00:00:00Z", "2026-11-13T00:00:00Z")).toContain("nothing busy");
-});
-
-test("work calendar names are configurable and case-insensitive", () => {
-  vi.stubEnv("PHONE_CALENDAR_WORK_NAMES", " Family, Work@example.com ");
-  expect(parsePhoneCalendar(lines).map((slot) => slot.kind)).toEqual(["private", "work"]);
-});
-
-test("empty skip override includes every valid calendar", () => {
-  vi.stubEnv("PHONE_CALENDAR_SKIP_NAMES", "");
-  expect(parsePhoneCalendar(lines)).toHaveLength(4);
 });
 
 test("busy text uses the configured timezone", () => {

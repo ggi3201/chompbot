@@ -24,14 +24,11 @@ beforeAll(() => {
 });
 
 describe("listProjects", () => {
-  test("lists the git repos directly under the root, by name", () => {
+  test("lists the git repos directly under the root, by name, and nothing for a missing root", () => {
     expect(listProjects(root)).toEqual([
       { name: "alpha", path: join(root, "alpha") },
       { name: "zeta", path: join(root, "zeta") },
     ]);
-  });
-
-  test("is empty when the root does not exist", () => {
     expect(listProjects(join(root, "missing"))).toEqual([]);
   });
 

@@ -13,46 +13,31 @@ const rule = (over: Partial<RuleShape>): RuleShape => ({
 });
 
 describe("describeTrigger", () => {
-  it("names a daily rule by its window", () => {
+  it("names a daily rule by its window: a range, a single hour with the zone, or no window for a full day", () => {
     expect(describeTrigger(rule({ cooldownMinutes: 1380, activeHours: { start: 7, end: 8 } }))).toBe("Daily · 07:00–09:00");
-  });
-
-  it("shows a single-hour window as one time, with the zone", () => {
     expect(describeTrigger(rule({ cooldownMinutes: 1380, activeHours: { start: 12, end: 12, timezone: "Europe/Oslo" } }))).toBe("Daily · 12:00 Oslo");
-  });
-
-  it("calls a 4-day and a weekly cooldown by their length", () => {
-    expect(describeTrigger(rule({ cooldownMinutes: 5760 }))).toBe("Every 4 days");
-    expect(describeTrigger(rule({ cooldownMinutes: 10080 }))).toBe("Weekly");
-  });
-
-  it("describes jittered rules by their range", () => {
-    expect(describeTrigger(rule({ condition: { scheduleMode: "jittered", jitterMinMinutes: 90, jitterMaxMinutes: 240 } }))).toBe("Every 1h 30m–4h");
-  });
-
-  it("treats a full-day window as no window", () => {
     expect(activeWindow({ start: 0, end: 23 })).toBeNull();
     expect(describeTrigger(rule({ cooldownMinutes: 20, activeHours: { start: 0, end: 23 } }))).toBe("Every 20 min");
   });
 
-  it("describes event rules with their filter count", () => {
+  it("calls a cooldown by its length, and a jittered rule by its range", () => {
+    expect(describeTrigger(rule({ cooldownMinutes: 5760 }))).toBe("Every 4 days");
+    expect(describeTrigger(rule({ cooldownMinutes: 10080 }))).toBe("Weekly");
+    expect(describeTrigger(rule({ condition: { scheduleMode: "jittered", jitterMinMinutes: 90, jitterMaxMinutes: 240 } }))).toBe("Every 1h 30m–4h");
+  });
+
+  it("describes event rules with their filter count, and one-offs by their time", () => {
     const r = rule({ triggerType: "event", condition: { eventType: "webhook.received", conditions: [{}, {}] } });
     expect(describeTrigger(r)).toBe("On webhook.received · 2 filters");
     expect(describeTrigger(rule({ triggerType: "event" }))).toBe("On any event");
-  });
-
-  it("describes one-offs by their time", () => {
     expect(describeTrigger(rule({ runAt: "2026-11-10T08:30:00.000Z" }))).toMatch(/^Once, /);
   });
 });
 
 describe("guardNotes and describeAction", () => {
-  it("turns a market session guard into a short note", () => {
+  it("turns a market session guard into a short note, and names the model and the gate script", () => {
     const r = rule({ condition: { guard: { mode: "all", rules: [{ type: "market_session", market: "XNAS", phase: "regular" }, { type: "weekday" }] } } });
     expect(guardNotes(r)).toEqual(["XNAS open", "weekday"]);
-  });
-
-  it("names the model and the gate script", () => {
     expect(describeAction(rule({ actionConfig: { provider: "claude", model: "opus" } }))).toBe("Agent · opus");
     expect(describeAction(rule({ actionType: "script_gate", actionConfig: { script: "company_news_scan" } }))).toBe("Gate: company news scan");
   });

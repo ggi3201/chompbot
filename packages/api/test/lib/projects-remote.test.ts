@@ -48,12 +48,9 @@ afterAll(() => {
 
 // These run first: an unavailable gh is never cached, a working one is.
 describe("when gh cannot list repos", () => {
-  test("says gh is missing", async () => {
+  test("says gh is missing, or logged out", async () => {
     process.env.PATH = join(root, "no-bin");
     expect(await listRemoteRepos(root)).toEqual({ repos: [], unavailable: "The GitHub CLI (gh) is not installed on the host." });
-  });
-
-  test("says gh is logged out", async () => {
     process.env.PATH = `${fakeBin}:${originalPath}`;
     process.env.FAKE_GH_LOGGED_OUT = "1";
     expect((await listRemoteRepos(root)).unavailable).toBe("The GitHub CLI (gh) is not logged in on the host.");
@@ -76,12 +73,10 @@ describe("listRemoteRepos", () => {
 });
 
 describe("cloneRepo", () => {
-  test("refuses a repo that is not in the server's list", async () => {
+  test("refuses a repo that is not in the server's list, or whose directory exists", async () => {
     await expect(cloneRepo("someone/else", { root })).rejects.toMatchObject({ status: 400 });
     await expect(cloneRepo("../../etc", { root })).rejects.toMatchObject({ status: 400 });
-  });
-
-  test("refuses when the directory exists", async () => {
+    // A repo in the list whose directory exists is refused too.
     mkdirSync(join(root, "old"));
     await expect(cloneRepo("me/old", { root })).rejects.toMatchObject({ status: 409 });
   });

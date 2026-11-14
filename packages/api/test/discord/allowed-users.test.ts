@@ -8,11 +8,8 @@ afterEach(() => {
   db.delete(settings).where(eq(settings.key, "discord_user_names")).run();
 });
 
-test("a stranger is never allowed, even before the owner is known", () => {
+test("a stranger is never allowed, even before the owner is known; people named in discord_user_names are", () => {
   expect(isAllowedDiscordUser("999")).toBe(false);
-});
-
-test("people named in discord_user_names are allowed", () => {
   db.insert(settings).values({ key: "discord_user_names", value: JSON.stringify({ "123": "Sam" }) }).run();
   expect(isAllowedDiscordUser("123")).toBe(true);
   expect(isAllowedDiscordUser("124")).toBe(false);

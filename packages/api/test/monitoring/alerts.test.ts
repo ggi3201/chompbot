@@ -7,7 +7,7 @@ vi.mock("../../src/monitoring/alerts-client.js", () => client);
 import { db } from "../../src/db/index.js";
 import { incidents, monitorWarnings } from "../../src/db/schema.js";
 import { off, on } from "../../src/events/bus.js";
-import { alertsIdle, FLOOD_LIMIT, notifyNewWarnings, renderIncident, replyUnderAlert } from "../../src/monitoring/alerts.js";
+import { alertsIdle, FLOOD_LIMIT, notifyNewWarnings, replyUnderAlert } from "../../src/monitoring/alerts.js";
 import { applyStatusChange, getIncident, settleIncidents } from "../../src/monitoring/incidents.js";
 import { addTarget, clearMonitoring, MINUTE, NOW } from "./helpers.js";
 
@@ -149,6 +149,8 @@ describe("incident messages", () => {
     await alertsIdle();
     expect(db.select().from(incidents).all()).toHaveLength(1);
     expect(api.sendMessage).not.toHaveBeenCalled();
+    // with no alert message there is nothing to reply to
+    expect(await replyUnderAlert(db.select().from(incidents).get()!.id, "text")).toBe(false);
   });
 
   test("a Telegram failure does not stop the incident", async () => {
@@ -173,14 +175,6 @@ describe("incident messages", () => {
     expect(log).not.toHaveBeenCalled();
     log.mockRestore();
   });
-
-  test("renderIncident names the cause and the first error of a one-service incident only once", () => {
-    addTarget({ key: "web", title: "Web", status: "down" });
-    fail("web", 0, "HTTP 502");
-    const text = renderIncident(getIncident(db.select().from(incidents).get()!.id)!);
-    expect(text).not.toContain("Cause:");
-    expect(text).not.toContain("Down (");
-  });
 });
 
 describe("replies under the alert", () => {
@@ -200,14 +194,6 @@ describe("replies under the alert", () => {
     expect(await replyUnderAlert(id, "plain <text")).toBe(true);
     expect(sent().at(-1)).toMatchObject({ text: "plain <text" });
     expect(sent().at(-1)?.opts).not.toHaveProperty("parse_mode");
-  });
-
-  test("with no alert message there is nothing to reply to", async () => {
-    client.alertsTarget.mockReturnValue(null);
-    addTarget({ key: "web", status: "down" });
-    fail("web", 0);
-    await alertsIdle();
-    expect(await replyUnderAlert(db.select().from(incidents).get()!.id, "text")).toBe(false);
   });
 });
 

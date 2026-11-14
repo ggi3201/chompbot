@@ -1,10 +1,6 @@
 import { expect, test } from "vitest";
 import { explainScheduleGuard, isWithinScheduleGuard } from "../../src/proactive/market-hours.js";
 
-test("schedule guard is opt-in", () => {
-  expect(isWithinScheduleGuard(undefined, new Date("2026-05-24T14:00:00Z"))).toBe(true);
-});
-
 test("NASDAQ regular session skips Sunday and allows regular cash hours", () => {
   const guard = { rules: [{ type: "market_session" as const, market: "XNAS" as const, phase: "regular" as const }] };
 
@@ -27,21 +23,21 @@ test("NASDAQ guard handles trading-day and after-close phases", () => {
   )).toBe(true);
 });
 
-test("market schedule guard skips US market holidays", () => {
+test("market schedule guard skips US and Norwegian exchange holidays", () => {
   expect(isWithinScheduleGuard(
     { rules: [{ type: "market_session", market: "NYSE", phase: "regular" }] },
     new Date("2026-12-25T15:00:00Z"),
   )).toBe(false);
-});
 
-test("Oslo market guard skips Norwegian exchange holidays", () => {
   expect(isWithinScheduleGuard(
     { rules: [{ type: "market_session", market: "XOSL", phase: "regular" }] },
     new Date("2026-05-14T10:00:00Z"),
   )).toBe(false);
 });
 
-test("generic guard supports weekday, date range, and any mode", () => {
+test("schedule guard is opt-in; the generic guard supports weekday, date range, and any mode, and explains its misses", () => {
+  expect(isWithinScheduleGuard(undefined, new Date("2026-05-24T14:00:00Z"))).toBe(true);
+
   expect(isWithinScheduleGuard(
     { rules: [{ type: "weekday", timezone: "Europe/Oslo", days: ["Sun"] }] },
     new Date("2026-05-24T14:00:00Z"),
@@ -62,9 +58,7 @@ test("generic guard supports weekday, date range, and any mode", () => {
     },
     new Date("2026-05-24T14:00:00Z"),
   )).toBe(true);
-});
 
-test("schedule guard explains non-market guard misses", () => {
   expect(explainScheduleGuard(
     { rules: [{ type: "weekday", timezone: "Europe/Oslo", days: ["Mon"] }] },
     new Date("2026-05-24T14:00:00Z"),

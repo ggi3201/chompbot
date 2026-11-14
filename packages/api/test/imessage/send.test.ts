@@ -49,13 +49,18 @@ beforeEach(() => {
 
 const send = (text = "I love you", chat = "Far", conversationId: string | undefined = "conv-1") => execSendImessage({ chat, text }, conversationId);
 
-test("an approved message reaches the Mac as written, with the send token", async () => {
+test("an approved message reaches the Mac as written, with the send token; approving for the session still sends only this one", async () => {
   askForApproval.mockResolvedValue("accept");
 
   await expect(send('Hei "far"\nline two')).resolves.toBe("Sent to Far (+4740000001).");
 
   expect(sent).toEqual([{ chatId: 9, text: 'Hei "far"\nline two' }]);
   expect(tokens).toEqual(["Bearer send-token", "Bearer send-token"]);
+
+  sent.length = 0;
+  askForApproval.mockResolvedValue("accept-session");
+  await send();
+  expect(sent).toHaveLength(1);
 });
 
 test("the card shows the exact text and recipient before anything is sent", async () => {
@@ -74,22 +79,12 @@ test("the card shows the exact text and recipient before anything is sent", asyn
   });
 });
 
-test.each([
-  ["decline", "the user declined"],
-  ["expired", "nobody approved in time"],
-] as const)("%s sends nothing and says so", async (outcome, words) => {
-  askForApproval.mockResolvedValue(outcome);
-
-  await expect(send()).resolves.toContain(`Nothing was sent: ${words}`);
+test("a decline or an expiry sends nothing and says so", async () => {
+  for (const [outcome, words] of [["decline", "the user declined"], ["expired", "nobody approved in time"]] as const) {
+    askForApproval.mockResolvedValue(outcome);
+    await expect(send()).resolves.toContain(`Nothing was sent: ${words}`);
+  }
   expect(sent).toEqual([]);
-});
-
-test("approving for the session still sends only this message", async () => {
-  askForApproval.mockResolvedValue("accept-session");
-
-  await send();
-
-  expect(sent).toHaveLength(1);
 });
 
 test("a message too long for the lock screen has no buttons there, and the card keeps all of it", async () => {
@@ -103,22 +98,19 @@ test("a message too long for the lock screen has no buttons there, and the card 
   expect(sent).toEqual([{ chatId: 9, text: long }]);
 });
 
-test("several matches ask the agent which one, with no approval", async () => {
+test("several matches ask the agent which one, and nobody found says so, with no approval", async () => {
   resolved = { candidates: ["9: Far [+4740000001]", "12: Farmor [+4740000002]"] };
 
   const result = await send();
 
   expect(result).toContain("Nothing was sent");
   expect(result).toContain("12: Farmor");
+
+  resolved = { error: 'No chat found for "Far".' };
+  await expect(send()).resolves.toBe('ERROR: Nothing was sent. No chat found for "Far".');
+
   expect(askForApproval).not.toHaveBeenCalled();
   expect(sent).toEqual([]);
-});
-
-test("nobody found asks nothing and sends nothing", async () => {
-  resolved = { error: 'No chat found for "Far".' };
-
-  await expect(send()).resolves.toBe('ERROR: Nothing was sent. No chat found for "Far".');
-  expect(askForApproval).not.toHaveBeenCalled();
 });
 
 test("a send the Mac refuses after approval is reported as failed", async () => {

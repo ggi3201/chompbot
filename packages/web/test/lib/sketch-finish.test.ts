@@ -17,13 +17,10 @@ function square(open = false): Float32Array {
   return ink;
 }
 
-test("a closed outline has an inside and an open one does not", () => {
+test("a closed outline has an inside, not counting the ink itself, and an open one does not", () => {
   expect(interiorOf(square(), W, H)[20 + 15 * W]).toBe(1);
   expect(interiorOf(square(), W, H)[2 + 2 * W]).toBe(0);
   expect(interiorOf(square(true), W, H).reduce((sum, v) => sum + v, 0)).toBe(0);
-});
-
-test("the ink itself is not counted as inside", () => {
   expect(interiorOf(square(), W, H)[10 + 15 * W]).toBe(0);
 });
 

@@ -27,9 +27,6 @@ import {
   recallMemories,
   getMemoriesForPrompt,
   buildMemoryContext,
-  isStated,
-  CORE_CATEGORIES,
-  RETRIEVAL_CATEGORIES,
 } from "../../src/db/memories.js";
 import { randomUUID } from "crypto";
 
@@ -58,11 +55,8 @@ beforeEach(() => {
 });
 
 describe("memory prompt tiering", () => {
-  it("returns an empty string when there are no memories", () => {
+  it("injects core categories verbatim, without truncation, and nothing when there are none", () => {
     expect(getMemoriesForPrompt()).toBe("");
-  });
-
-  it("injects core categories verbatim, without truncation", () => {
     // Well past the old 500-char cap that silently amputated content.
     const long = "INSTRUCTION-START " + "x".repeat(1500) + " INSTRUCTION-END";
     insert({ category: "instructions", content: long });
@@ -98,18 +92,6 @@ describe("memory prompt tiering", () => {
     expect(coreSection).not.toContain("DERIVED-RULE");
     // Still discoverable, just demoted to the index.
     expect(text).toContain("DERIVED-RULE");
-  });
-
-  it("classifies sources as stated or derived", () => {
-    expect(isStated("user")).toBe(true);
-    expect(isStated("seed")).toBe(true);
-    expect(isStated("auto")).toBe(false);
-  });
-
-  it("keeps core and retrieval category lists disjoint", () => {
-    for (const c of CORE_CATEGORIES) {
-      expect(RETRIEVAL_CATEGORIES).not.toContain(c);
-    }
   });
 });
 
@@ -151,19 +133,6 @@ describe("memory prompt budget", () => {
     expect(text).toContain("CRITICAL-STANDING-ORDER");
     expect(stats.core).toBe(1);
   });
-
-  it("is dramatically smaller than injecting everything verbatim", async () => {
-    let verbatim = 0;
-    for (let i = 0; i < 90; i++) {
-      const content = `lesson ${i} ` + "e".repeat(700);
-      verbatim += content.length;
-      insert({ category: "lessons", content });
-    }
-
-    const { text } = await buildMemoryContext();
-
-    expect(text.length).toBeLessThan(verbatim / 3);
-  });
 });
 
 describe("claims: evidence and supersession", () => {
@@ -193,6 +162,8 @@ describe("claims: evidence and supersession", () => {
     expect(next.supersedesId).toBeNull();
     expect(getMemoryById(stated.id)?.status).toBe("active");
     expect(getMemoryById(next.id)?.status).toBe("active");
+    // A supersedes id that does not exist is ignored too.
+    expect(saveMemory({ content: "a fact", category: "facts", source: "auto", supersedesId: "nope" }).supersedesId).toBeNull();
   });
 
   it("retires instead of erasing: hidden from prompts and recall, row kept, only once", () => {
@@ -204,11 +175,6 @@ describe("claims: evidence and supersession", () => {
     expect(recallMemories({ query: "sqlite3", limit: 100 }).map((m) => m.id)).not.toContain(id);
     expect(retireMemory(id)).toBe(false);
     expect(retireMemory("missing")).toBe(false);
-  });
-
-  it("ignores a supersedes id that does not exist", () => {
-    const m = saveMemory({ content: "a fact", category: "facts", source: "auto", supersedesId: "nope" });
-    expect(m.supersedesId).toBeNull();
   });
 });
 

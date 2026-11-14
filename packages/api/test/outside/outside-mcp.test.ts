@@ -45,7 +45,7 @@ test("only a stored token of fair length gets in, named after its secret", async
   expect((await rpc("tools/list", {}, "not-a-token-not-a-token-x")).status).toBe(401);
 });
 
-test("speaks MCP: initialize, notifications, tools/list with only the narrow set", async () => {
+test("speaks MCP: initialize, notifications, tools/list with only the narrow set, and refuses any other tool", async () => {
   const init = await (await rpc("initialize", { protocolVersion: "2025-03-26" })).json();
   expect(init.result).toMatchObject({ protocolVersion: "2025-03-26", serverInfo: { name: "chomp" } });
 
@@ -54,11 +54,9 @@ test("speaks MCP: initialize, notifications, tools/list with only the narrow set
 
   const names = (await (await rpc("tools/list")).json()).result.tools.map((tool: { name: string }) => tool.name).sort();
   expect(names).toEqual(["get_conversation_messages", "get_reply", "list_conversations", "message_chat", "my_chats", "recall_memories", "save_memory", "search_conversations", "start_chat"]);
-});
 
-test("refuses tools outside the narrow set even when called by name", async () => {
-  const result = await call("send_imessage", { to: "x", text: "y" });
-  expect(result).toMatchObject({ isError: true, content: [{ text: "Unknown tool: send_imessage" }] });
+  // Tools outside the narrow set are refused even when called by name.
+  expect(await call("send_imessage", { to: "x", text: "y" })).toMatchObject({ isError: true, content: [{ text: "Unknown tool: send_imessage" }] });
 });
 
 test("reaches Chomp's memories", async () => {

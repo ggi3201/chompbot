@@ -174,17 +174,20 @@ test("a voice message runs as its transcript, swiped into the chat it answers, a
   expect(handleChatMessage.mock.calls[0][1]).toMatchObject({ conversationId: id });
 });
 
-test.each([
-  ["fails", () => transcribeAudio.mockRejectedValue(new Error("down"))],
-  ["comes back empty", () => transcribeAudio.mockResolvedValue("  ")],
-])("when transcription %s, nothing reaches the agent", async (_case, arrange) => {
-  stubTelegramDownload();
-  arrange();
-  const { ctx, replies } = voiceCtx({});
-  await handleTelegramMessage(ctx);
-  await flush();
-  vi.unstubAllGlobals();
+test("when transcription fails or comes back empty, nothing reaches the agent", async () => {
+  const cases: Array<[string, () => void]> = [
+    ["fails", () => transcribeAudio.mockRejectedValue(new Error("down"))],
+    ["comes back empty", () => transcribeAudio.mockResolvedValue("  ")],
+  ];
+  for (const [name, arrange] of cases) {
+    stubTelegramDownload();
+    arrange();
+    const { ctx, replies } = voiceCtx({});
+    await handleTelegramMessage(ctx);
+    await flush();
+    vi.unstubAllGlobals();
 
-  expect(handleChatMessage).not.toHaveBeenCalled();
-  expect(replies[0].html).toContain("couldn't make out");
+    expect(handleChatMessage, name).not.toHaveBeenCalled();
+    expect(replies[0].html, name).toContain("couldn't make out");
+  }
 });

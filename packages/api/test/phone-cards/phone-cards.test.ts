@@ -67,7 +67,7 @@ test("publishing stores the cards with UTC times and tells the phone silently", 
   }]);
 });
 
-test("a card keeps its icon, tone, rows and link", async () => {
+test("a card keeps its icon, tone, rows and link, and one without them gets the normal tone and no rows", async () => {
   await execPublishPhoneCards({
     group: "flight",
     cards: [{
@@ -87,15 +87,13 @@ test("a card keeps its icon, tone, rows and link", async () => {
     rows: [{ label: "Gate", value: "B12" }],
     link: "https://example.com/pass",
   }]);
-});
 
-test("a card without the optional fields gets the normal tone and no rows", async () => {
   await execPublishPhoneCards(trip(inHours(3)));
-
-  expect(JSON.parse(execListPhoneCards())[0]).toMatchObject({ tone: "normal", rows: [], icon: null, link: null });
+  const plain = (JSON.parse(execListPhoneCards()) as { group: string }[]).find((card) => card.group === "trip");
+  expect(plain).toMatchObject({ tone: "normal", rows: [], icon: null, link: null });
 });
 
-test("text too long for a small widget is refused", async () => {
+test("invalid cards, and text too long for a small widget, are refused", async () => {
   const card = { showFrom: inHours(1), showUntil: inHours(2), headline: "x".repeat(49) };
 
   expect(await execPublishPhoneCards({ group: "g", cards: [card] })).toContain("cards.0.headline");
@@ -103,6 +101,10 @@ test("text too long for a small widget is refused", async () => {
     group: "g",
     cards: [{ ...card, headline: "Short", rows: [{ label: "Label", value: "v".repeat(23) }] }],
   })).toContain("cards.0.rows.0.value");
+  const base = { showFrom: inHours(2), showUntil: inHours(1), headline: "Backwards" };
+  expect(await execPublishPhoneCards({ group: "g", cards: [base] })).toContain("showUntil must be after showFrom");
+  expect(await execPublishPhoneCards({ group: "g", cards: [{ ...base, showFrom: "12:50", showUntil: inHours(1) }] })).toContain("ERROR: Invalid cards");
+  expect(await execPublishPhoneCards({ group: "g", cards: [{ showFrom: inHours(-2), showUntil: inHours(-1), headline: "Late" }] })).toContain("every card has already ended");
   expect(db.select().from(phoneCards).all()).toHaveLength(0);
 });
 
@@ -116,7 +118,7 @@ test("publishing a group again replaces its cards and leaves other groups alone"
   expect(cards.filter((card) => card.group === "other")).toHaveLength(2);
 });
 
-test("a moved countdown sends one visible notification with the next headline", async () => {
+test("a moved countdown sends one visible notification with the next headline; rewording a card does not alert", async () => {
   const first = inHours(3);
   const second = inHours(3.5);
   await execPublishPhoneCards(trip(first));
@@ -127,15 +129,11 @@ test("a moved countdown sends one visible notification with the next headline", 
   expect(result).toContain("visible notification");
   expect(apns.sendAlertPush).toHaveBeenCalledWith(expect.objectContaining({ title: "Time changed", body: `Leave at ${second}` }));
   expect(apns.sendSilentPush).not.toHaveBeenCalled();
-});
 
-test("rewording a card and publishing a new group do not alert", async () => {
-  const leaveAt = inHours(3);
-  await execPublishPhoneCards(trip(leaveAt));
-  const reworded = trip(leaveAt);
+  vi.clearAllMocks();
+  const reworded = trip(second);
   reworded.cards[1].headline = "Go now";
   await execPublishPhoneCards(reworded);
-
   expect(apns.sendAlertPush).not.toHaveBeenCalled();
 });
 
@@ -156,14 +154,6 @@ test("cards that have ended leave the list and are cleared by the next publish",
   await execPublishPhoneCards(trip(inHours(3)));
 
   expect(db.select().from(phoneCards).all().map((card) => card.groupKey)).not.toContain("old-trip");
-});
-
-test("invalid cards are refused", async () => {
-  const base = { showFrom: inHours(2), showUntil: inHours(1), headline: "Backwards" };
-  expect(await execPublishPhoneCards({ group: "g", cards: [base] })).toContain("showUntil must be after showFrom");
-  expect(await execPublishPhoneCards({ group: "g", cards: [{ ...base, showFrom: "12:50", showUntil: inHours(1) }] })).toContain("ERROR: Invalid cards");
-  expect(await execPublishPhoneCards({ group: "g", cards: [{ showFrom: inHours(-2), showUntil: inHours(-1), headline: "Late" }] })).toContain("every card has already ended");
-  expect(db.select().from(phoneCards).all()).toHaveLength(0);
 });
 
 test("a phone that cannot be reached is reported, and the cards stay saved", async () => {

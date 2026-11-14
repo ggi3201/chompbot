@@ -34,17 +34,10 @@ afterEach(() => {
 
 const tokenSource = async () => ((await (await fetch(`${base}/status`)).json()) as { tokenSource: string | null }).tokenSource;
 
-test("with no token anywhere, the status says so", async () => {
+test("status reports no token, then .env, and a token saved in Settings wins over .env", async () => {
   expect(await tokenSource()).toBeNull();
-});
-
-test("a token in the server's .env shows as coming from there", async () => {
   vi.stubEnv("TELEGRAM_API_KEY", "111:from-env");
   expect(await tokenSource()).toBe("env");
-});
-
-test("a token saved in Settings wins over the one in .env", async () => {
-  vi.stubEnv("TELEGRAM_API_KEY", "111:from-env");
   saveSecret("TELEGRAM_API_KEY", "222:from-settings");
   expect(await tokenSource()).toBe("settings");
 });

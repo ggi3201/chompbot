@@ -31,7 +31,7 @@ afterEach(() => {
 const states = (statuses: { source: string; state: string }[]) => Object.fromEntries(statuses.map((s) => [s.source, s.state]));
 
 describe("collecting", () => {
-  test("every source answers on the mini, and each says how much it found", async () => {
+  test("every source answers on the mini, and each says how much it found; a locally configured tunnel is skipped", async () => {
     const snapshot = await collectSnapshot();
     expect(snapshot.statuses).toEqual([
       { source: "traefik", state: "ok", message: null, count: 35 },
@@ -46,10 +46,7 @@ describe("collecting", () => {
     expect(snapshot.homeIp).toBe("203.0.113.7");
     expect(snapshot.tailnetIps).toEqual(["100.64.0.42", "fd7a:115c:a1e0::42"]);
     expect(snapshot.listeners.filter((l) => l.port === 5433)).toHaveLength(1);
-  });
-
-  test("a tunnel that is configured by a local file has no ingress to read, and is skipped", async () => {
-    await collectSnapshot();
+    // A tunnel that is configured by a local file has no ingress to read, and is skipped.
     const asked = (vi.mocked(fetch).mock.calls as unknown[][]).map((call) => String(call[0]));
     expect(asked.filter((url) => url.includes("/configurations"))).toHaveLength(1);
   });
@@ -89,16 +86,15 @@ describe("collecting", () => {
     expect([snapshot.containers, snapshot.listeners, snapshot.routes]).toEqual([[], [], []]);
   });
 
-  test("a failure that is not absence is an error with the program's own first line", async () => {
+  test("a failure that is not absence is an error with the program's own first line; no containers at all is fine", async () => {
     mini.commands.set("docker ps -aq", new Error("permission denied while trying to connect to the Docker daemon socket"));
     const snapshot = await collectSnapshot();
     expect(snapshot.statuses.find((s) => s.source === "docker")).toEqual({ source: "docker", state: "error", message: "permission denied while trying to connect to the Docker daemon socket", count: 0 });
-  });
 
-  test("a host with no containers is fine", async () => {
+    // A host with no containers is fine.
     mini.commands.set("docker ps -aq", "");
-    const snapshot = await collectSnapshot();
-    expect(snapshot.statuses.find((s) => s.source === "docker")).toMatchObject({ state: "ok", count: 0 });
+    const empty = await collectSnapshot();
+    expect(empty.statuses.find((s) => s.source === "docker")).toMatchObject({ state: "ok", count: 0 });
   });
 
   test("Traefik that answers with an error, or the home IP lookup that fails, is an error", async () => {

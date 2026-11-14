@@ -102,7 +102,7 @@ describe("writing to KV", () => {
     expect(PROBE_PORTS).toEqual([22, 80, 443, 3001, 5433, 5434, 5435, 5632, 6379, 8000, 9000, 9443]);
   });
 
-  test("writes once per change: an unchanged list is skipped, a changed one bumps the version", async () => {
+  test("writes once per change: an unchanged list is skipped, a changed list or home host bumps the version", async () => {
     configure();
     addTarget({ key: "a", url: "https://a.example.com/", exposure: "public-tunnel" });
     await syncProbeTargets(FACTS);
@@ -125,17 +125,14 @@ describe("writing to KV", () => {
     await syncProbeTargets(FACTS);
     expect(kv).toHaveBeenCalledTimes(3);
     expect(sent(2).value.version).toBe(3);
-  });
 
-  test("a changed home host is a change too", async () => {
-    configure();
-    await syncProbeTargets(FACTS);
+    // A new home IP under the same hostname is no change; a changed home host is one.
     await syncProbeTargets({ ...FACTS, homeIp: "203.0.113.8", dns: [dns("home.example.com", "203.0.113.8", false)] });
-    expect(kv).toHaveBeenCalledTimes(1);
+    expect(kv).toHaveBeenCalledTimes(3);
     saveSecret("MONITOR_HOME_HOST", "ports.example.net");
     await syncProbeTargets(FACTS);
-    expect(kv).toHaveBeenCalledTimes(2);
-    expect(sent(1).value.homeHost).toBe("ports.example.net");
+    expect(kv).toHaveBeenCalledTimes(4);
+    expect(sent(3).value.homeHost).toBe("ports.example.net");
   });
 
   test("a failed write is reported and tried again on the next run", async () => {

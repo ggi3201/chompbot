@@ -60,23 +60,15 @@ afterEach(() => {
   db.delete(newsSeen).where(eq(newsSeen.ticker, TICKER)).run();
 });
 
-test("fires on a new SEC 8-K filing and surfaces it in gate data", async () => {
-  mockEdgar("0001234567-26-000045", "8-K - ACME INC (0001234567) (Filer)");
-
-  const result = await runScriptGate(baseGate());
-
-  expect(result.matched).toBe(true);
-  expect(result.summary).toContain("SEC 8-K");
-  const items = result.data?.items as Array<{ source: string; headline: string }>;
-  expect(items).toHaveLength(1);
-  expect(items[0].source).toBe("edgar");
-});
-
-test("does not re-fire on an already-seen filing (dedup ledger)", async () => {
+test("fires on a new SEC 8-K filing, and does not re-fire once it is seen (dedup ledger)", async () => {
   mockEdgar("0001234567-26-000045", "8-K - ACME INC (0001234567) (Filer)");
 
   const first = await runScriptGate(baseGate());
   expect(first.matched).toBe(true);
+  expect(first.summary).toContain("SEC 8-K");
+  const items = first.data?.items as Array<{ source: string; headline: string }>;
+  expect(items).toHaveLength(1);
+  expect(items[0].source).toBe("edgar");
 
   const second = await runScriptGate(baseGate());
   expect(second.matched).toBe(false);

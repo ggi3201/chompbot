@@ -34,10 +34,8 @@ describe("quoteBlock", () => {
 });
 
 describe("diffComment", () => {
-  it("points at the new line, quotes it and adds the note", () => {
+  it("points at the new line of an addition, names a removed line by its old number", () => {
     expect(diffComment("src/a.ts", { kind: "add", text: "  const x = 1;", newLine: 42 }, " rename x \n")).toBe("`src/a.ts:42`\n> const x = 1;\n\nrename x\n");
-  });
-  it("names a removed line by its old number", () => {
     expect(diffComment("src/a.ts", { kind: "del", text: "gone()", oldLine: 7 }, "why?")).toBe("`src/a.ts`, removed line 7\n> gone()\n\nwhy?\n");
   });
 });

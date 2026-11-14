@@ -12,12 +12,13 @@ vi.mock("child_process", () => ({
 
 const { exposeOnTailnet } = await import("../../src/preview/expose.js");
 
-test.each(["http://localhost:80/", "http://localhost:1000/"])("refuses %s, whose port it cannot map onto the tailnet", async (url) => {
-  await expect(exposeOnTailnet(url)).rejects.toThrow(/cannot be mapped onto the tailnet/);
-});
-
-test.each([9222, 6080, 3002])("refuses to expose %s, which is not a dev server", async (port) => {
-  await expect(exposeOnTailnet(`http://localhost:${port}/`)).rejects.toThrow(/is not a dev server/);
+test("refuses ports it cannot map onto the tailnet, and ports that are not a dev server", async () => {
+  for (const url of ["http://localhost:80/", "http://localhost:1000/"]) {
+    await expect(exposeOnTailnet(url), url).rejects.toThrow(/cannot be mapped onto the tailnet/);
+  }
+  for (const port of [9222, 6080, 3002]) {
+    await expect(exposeOnTailnet(`http://localhost:${port}/`), String(port)).rejects.toThrow(/is not a dev server/);
+  }
 });
 
 test("leaves a page that is not on this host as it is", async () => {

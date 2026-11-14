@@ -20,7 +20,7 @@ test("no entity configured means no location requests", async () => {
   expect(fetcher).not.toHaveBeenCalled();
 });
 
-test("configured tracker and optional geocoded sensor are used", async () => {
+test("configured tracker and optional geocoded sensor are used; without the sensor, tracker coordinates", async () => {
   const fetcher = configuredHa();
   vi.stubEnv("HOMEASSISTANT_LOCATION_ENTITY", "device_tracker.test_phone");
   vi.stubEnv("HOMEASSISTANT_GEOCODED_ENTITY", "sensor.test_place");
@@ -28,11 +28,8 @@ test("configured tracker and optional geocoded sensor are used", async () => {
   expect(fetcher.mock.calls.map(([url]) => url)).toEqual([
     "http://ha.example.com/api/states/device_tracker.test_phone", "http://ha.example.com/api/states/sensor.test_place",
   ]);
-});
 
-test("without a geocoded sensor, tracker coordinates are used", async () => {
-  const fetcher = configuredHa();
-  vi.stubEnv("HOMEASSISTANT_LOCATION_ENTITY", "device_tracker.test_phone");
+  fetcher.mockClear();
   vi.stubEnv("HOMEASSISTANT_GEOCODED_ENTITY", "");
   expect(await getAgentContext()).toContain("user_location: 51.5000, -0.1000");
   expect(fetcher).toHaveBeenCalledOnce();

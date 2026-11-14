@@ -19,7 +19,8 @@ beforeEach(() => {
   db.delete(souls).run();
 });
 
-test("a channel's own target beats the overall default", () => {
+test("with no defaults saved everything runs on Claude, and a channel's own target beats the overall default", () => {
+  expect(channelTarget("discord")).toEqual({ provider: "claude", model: "sonnet" });
   db.insert(settings).values({ key: "run_target", value: JSON.stringify({ provider: "claude", model: "opus" }) }).run();
   db.insert(settings).values({ key: "run_target_discord", value: JSON.stringify({ provider: "codex", model: "gpt-5.5", soulId: "soul-spicy" }) }).run();
 
@@ -27,29 +28,21 @@ test("a channel's own target beats the overall default", () => {
   expect(channelTarget("telegram")).toEqual({ provider: "claude", model: "opus" });
 });
 
-test("with no defaults saved, everything runs on Claude", () => {
-  expect(channelTarget("discord")).toEqual({ provider: "claude", model: "sonnet" });
-});
-
-test("@claude and @codex are ordinary text: they no longer switch the runtime", () => {
+test("@claude, @codex and @chat are ordinary text: they no longer switch the runtime", () => {
   const routing = routeMessage("ask @codex later, or @claude code");
 
   expect(routing).toMatchObject({ action: "delegate", reason: "default", prompt: "ask @codex later, or @claude code" });
   expect(routing.provider).toBeUndefined();
-});
-
-test("@chat is ordinary text: every message goes to an agent", () => {
+  // @chat too: every message goes to an agent.
   expect(routeMessage("I have something like @chat in my shorthands").action).toBe("delegate");
+  // No mention leaves the choice to the caller.
+  expect(routeMessage("ship the thing")).toEqual({ action: "delegate", prompt: "ship the thing", reason: "default" });
 });
 
 test("@soul answers as that soul, on whatever the turn would run on anyway", () => {
   insertSoul("soul-alfred", "Alfred");
 
   expect(routeMessage("@Alfred what is on today?")).toMatchObject({ action: "delegate", soulId: "soul-alfred", prompt: "what is on today?" });
-});
-
-test("no mention leaves the choice to the caller", () => {
-  expect(routeMessage("ship the thing")).toEqual({ action: "delegate", prompt: "ship the thing", reason: "default" });
 });
 
 const alfredRow = { provider: "claude", model: "opus", effort: "high", soulId: "alfred" } as const;
@@ -70,12 +63,9 @@ test("a model of another provider does not inherit the row's engine", () => {
     .toEqual({ provider: "codex", model: "gpt-5.5", soulId: "alfred" });
 });
 
-test("nothing to move, or an unknown name, leaves the config alone", () => {
+test("nothing to move, an unknown name, or a config moved already, leaves the config alone", () => {
   expect(moveAgentToTarget({ prompt: "go", provider: "claude" }, "agent", resolve)).toBeNull();
   expect(moveAgentToTarget({ agent: "Renamed Ghost", prompt: "go" }, "agent", resolve)).toBeNull();
-});
-
-test("moved configs are not moved again", () => {
-  const moved = moveAgentToTarget({ agent: "Alfred" }, "agent", resolve)!;
-  expect(moveAgentToTarget(moved, "agent", resolve)).toBeNull();
+  // Moved configs are not moved again.
+  expect(moveAgentToTarget(moveAgentToTarget({ agent: "Alfred" }, "agent", resolve)!, "agent", resolve)).toBeNull();
 });

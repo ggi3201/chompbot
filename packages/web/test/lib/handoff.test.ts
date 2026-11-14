@@ -25,27 +25,22 @@ const providers: AgentProviderModels[] = [
 const current: AgentSelection = { provider: "claude", model: "opus", effort: "high", fast: false, access: "full", soulId: "alfred" };
 
 describe("parseHandoff", () => {
-  it("is null for anything but the command", () => {
+  it("is null for anything but the command, and keeps the current choice when no settings are named", () => {
     expect(parseHandoff("hello", providers, current)).toBeNull();
     expect(parseHandoff("/handoffs", providers, current)).toBeNull();
-  });
-
-  it("keeps the current choice when no settings are named", () => {
     expect(parseHandoff("/handoff", providers, current)).toEqual({ target: current, goal: "" });
   });
 
-  it("reads model and effort, keeping soul and access", () => {
+  it("reads model and effort, keeping soul and access, and drops the old effort on a bare model change", () => {
     const parsed = parseHandoff("/handoff sonnet 5.5 high", providers, current);
     expect(parsed).toEqual({ target: { ...current, model: "sonnet", effort: "high" }, goal: "" });
+    // The old effort is dropped when the model changes and none is named.
+    expect(parseHandoff("/handoff haiku", providers, current)?.target.effort).toBeUndefined();
   });
 
   it("matches a full name before a short one", () => {
     expect(parseHandoff("/handoff sonnet 5", providers, current)?.target.model).toBe("claude-sonnet-5");
     expect(parseHandoff("/handoff sonnet", providers, current)?.target.model).toBe("sonnet");
-  });
-
-  it("drops the old effort when the model changes and none is named", () => {
-    expect(parseHandoff("/handoff haiku", providers, current)?.target.effort).toBeUndefined();
   });
 
   it("crosses engines by model name or by engine", () => {

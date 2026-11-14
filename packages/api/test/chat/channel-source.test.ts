@@ -30,23 +30,14 @@ const tagsOf = (id: string) => JSON.parse(db.select().from(conversations).where(
 const userSources = (id: string) => db.select().from(chatMessages).where(eq(chatMessages.conversationId, id)).all()
   .filter((m) => m.role === "user").map((m) => m.source);
 
-test("a Telegram message is marked, and tags its chat once", async () => {
+test("each message keeps its own source, and a chat is tagged once per channel", async () => {
   const id = insertChat();
 
   await send(id, "telegram");
-  await send(id, "telegram");
-
-  expect(userSources(id)).toEqual(["telegram", "telegram"]);
-  expect(tagsOf(id)).toEqual(["telegram"]);
-});
-
-test("a chat used from both keeps both tags and each message's own source", async () => {
-  const id = insertChat();
-
   await send(id, "telegram");
   await send(id, "discord");
 
-  expect(userSources(id)).toEqual(["telegram", "discord"]);
+  expect(userSources(id)).toEqual(["telegram", "telegram", "discord"]);
   expect(tagsOf(id)).toEqual(["telegram", "discord"]);
 });
 

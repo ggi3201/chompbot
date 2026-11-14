@@ -65,21 +65,18 @@ test("a late report does not undo a newer one, and every report is kept", async 
   expect(db.select().from(locationHistory).all()).toHaveLength(2);
 });
 
-test("the phone cannot claim a zone, and the tool says how old the Home Assistant zone is", async () => {
+test("the tool has no zone until Home Assistant reports; the phone cannot claim one, and the tool says how old the zone is", async () => {
+  await post(report({ capturedAt: minutesAgo(10) }));
+  const before = JSON.parse(execGetLocation());
+  expect(before.place).toBeNull();
+  expect(before.placeAsOf).toBeUndefined();
+
   const stale = fromHomeAssistant(45 * 60, "Home");
   ingestLocation(stale);
   await post(report({ place: "Store", address: "Oslo S, Oslo" }));
 
   expect(JSON.parse(execGetLocation())).toMatchObject({ source: "phone", place: "Home", placeAsOf: stale.capturedAt, address: "Oslo S, Oslo", ageMinutes: 5 });
   expect(db.select().from(locationHistory).all().filter((row) => row.source === "phone")[0].place).toBeNull();
-});
-
-test("the tool has no zone until Home Assistant has reported", async () => {
-  await post(report());
-
-  const position = JSON.parse(execGetLocation());
-  expect(position.place).toBeNull();
-  expect(position.placeAsOf).toBeUndefined();
 });
 
 test("phone reports do not move the user out of a zone, and do not hide a zone change that comes just after", async () => {

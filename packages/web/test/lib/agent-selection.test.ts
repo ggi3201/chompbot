@@ -31,9 +31,10 @@ describe("resolveSelection", () => {
     expect(resolveSelection(providers)).toEqual({ provider: "claude", model: "opus", effort: "high", fast: false, access: "full" });
   });
 
-  it("falls back when the stored provider is unavailable", () => {
+  it("falls back when the stored provider is unavailable, and returns nothing when none is", () => {
     expect(resolveSelection(providers, { provider: "codex", model: "gpt", access: "supervised" }))
       .toMatchObject({ provider: "claude", model: "opus", access: "supervised" });
+    expect(resolveSelection([])).toBeUndefined();
   });
 
   it("drops an effort the model lacks and fast where unsupported", () => {
@@ -41,10 +42,6 @@ describe("resolveSelection", () => {
       .toMatchObject({ effort: "high", fast: true });
     expect(resolveSelection(providers, { provider: "claude", model: "haiku", effort: "high", fast: true, access: "full" }))
       .toEqual({ provider: "claude", model: "haiku", fast: false, access: "full" });
-  });
-
-  it("returns nothing when no provider is available", () => {
-    expect(resolveSelection([])).toBeUndefined();
   });
 
   it("labels efforts in sentence case", () => {

@@ -108,23 +108,19 @@ test("the worst run (huge list, port minute, alarm, state write) stays inside th
   assert.equal(w.subrequests, SUBREQUEST_BUDGET);
 });
 
-test("a missing target list still reports, with nothing checked", async () => {
-  const w = world({});
-  await runProbe(env(w.deps.kv as Env["TARGETS"]), w.deps, PORT_MINUTE_MS);
+test("a missing or invalid target list still reports, with nothing checked", async () => {
+  const missing = world({});
+  await runProbe(env(missing.deps.kv as Env["TARGETS"]), missing.deps, PORT_MINUTE_MS);
+  assert.equal(missing.reports.length, 1);
+  assert.deepEqual(missing.reports[0].results, []);
+  assert.equal(missing.reports[0].ports, undefined);
+  assert.deepEqual([missing.probed.length, missing.connected.length], [0, 0]);
 
-  assert.equal(w.reports.length, 1);
-  assert.deepEqual(w.reports[0].results, []);
-  assert.equal(w.reports[0].ports, undefined);
-  assert.deepEqual([w.probed.length, w.connected.length], [0, 0]);
-});
-
-test("an invalid target list is treated like a missing one", async () => {
-  const w = world({ targets: { version: 1, urls: [{ key: "a", url: "ftp://x" }], ports: [], homeHost: "h" } });
-  await runProbe(env(w.deps.kv as Env["TARGETS"]), w.deps, PORT_MINUTE_MS + 60_000);
-
-  assert.equal(w.reports.length, 1);
-  assert.deepEqual(w.reports[0].results, []);
-  assert.equal(w.probed.length, 0);
+  const invalid = world({ targets: { version: 1, urls: [{ key: "a", url: "ftp://x" }], ports: [], homeHost: "h" } });
+  await runProbe(env(invalid.deps.kv as Env["TARGETS"]), invalid.deps, PORT_MINUTE_MS + 60_000);
+  assert.equal(invalid.reports.length, 1);
+  assert.deepEqual(invalid.reports[0].results, []);
+  assert.equal(invalid.probed.length, 0);
 });
 
 test("three failed runs send the alarm once", async () => {

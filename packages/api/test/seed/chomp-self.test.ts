@@ -11,23 +11,19 @@ test("the catalogue lists every tool once", () => {
   }
 });
 
-test("the phone-widget skill only names tools that exist", () => {
+test("the guide and the phone-widget skill only name tools that exist", () => {
   const names = new Set(MCP_TOOLS.map((tool) => tool.name));
-  const toolLike = [...phoneWidgetSkill().content.matchAll(/`([a-z]+(?:_[a-z]+)+)`/g)].map((match) => match[1]);
-  expect(toolLike).toContain("publish_phone_cards");
-  expect(toolLike.filter((name) => !names.has(name))).toEqual([]);
+  const toolsIn = (text: string) => [...text.matchAll(/`([a-z]+(?:_[a-z]+)+)`/g)].map((match) => match[1]);
+  const widget = toolsIn(phoneWidgetSkill().content);
+  expect(widget).toContain("publish_phone_cards");
+  expect(widget.filter((name) => !names.has(name))).toEqual([]);
+  const guide = toolsIn(chompSelfSkill().content.split("## Every Chomp tool")[0]);
+  expect(guide.length).toBeGreaterThan(0);
+  expect(guide.filter((name) => !names.has(name))).toEqual([]);
 });
 
 test("the phone-widget skill's trip example is a valid publish, apart from its dates", () => {
   const example = JSON.parse(phoneWidgetSkill().content.match(/```json\n([\s\S]+?)```/)![1]);
   const future = JSON.parse(JSON.stringify(example).replaceAll("2026-", "2099-"));
   expect(publishSchema.safeParse(future).error).toBeUndefined();
-});
-
-test("the guide only names tools that exist", () => {
-  const guide = chompSelfSkill().content.split("## Every Chomp tool")[0];
-  const names = new Set(MCP_TOOLS.map((tool) => tool.name));
-  const toolLike = [...guide.matchAll(/`([a-z]+(?:_[a-z]+)+)`/g)].map((match) => match[1]);
-  expect(toolLike.length).toBeGreaterThan(0);
-  expect(toolLike.filter((name) => !names.has(name))).toEqual([]);
 });

@@ -244,7 +244,7 @@ describe("After a crash", () => {
 });
 
 describe("Codex item mapping", () => {
-  test("an added file arrives as plain content and still gets a diff with counts", () => {
+  test("an added file arrives as plain content and still gets a diff with counts; an update keeps its diff", () => {
     const body = codexItemBody({
       type: "fileChange",
       id: "fc-1",
@@ -252,12 +252,11 @@ describe("Codex item mapping", () => {
       changes: [{ path: "/w/new.txt", kind: { type: "add" }, diff: "line one\nline two\n" }],
     });
     expect(body).toMatchObject({ kind: "file_change", status: "completed", files: [{ path: "/w/new.txt", kind: "add", additions: 2, deletions: 0 }] });
-  });
 
-  test("an updated file keeps Codex's own unified diff", () => {
+    // An updated file keeps Codex's own unified diff.
     const diff = diffFile("/w/a.txt", "old\n", "new\n", "update").diff;
-    const body = codexItemBody({ type: "fileChange", id: "fc-2", status: "completed", changes: [{ path: "/w/a.txt", kind: { type: "update" }, diff }] });
-    expect(body).toMatchObject({ files: [{ diff, additions: 1, deletions: 1 }] });
+    const updated = codexItemBody({ type: "fileChange", id: "fc-2", status: "completed", changes: [{ path: "/w/a.txt", kind: { type: "update" }, diff }] });
+    expect(updated).toMatchObject({ files: [{ diff, additions: 1, deletions: 1 }] });
   });
 });
 
@@ -265,10 +264,8 @@ describe("Codex plan mode", () => {
   test("the <proposed_plan> block becomes the plan and leaves the rest of the message", () => {
     const message = "Here is the plan.\n\n<proposed_plan>\n# Add notes.md\n\n1. Write the file\n</proposed_plan>";
     expect(splitProposedPlan(message)).toEqual({ text: "Here is the plan.", plan: "# Add notes.md\n\n1. Write the file" });
-  });
-
-  test("a message that only mentions the tag is left alone", () => {
-    const message = "I will end with a <proposed_plan> block once we agree.";
-    expect(splitProposedPlan(message)).toEqual({ text: message });
+    // A message that only mentions the tag is left alone.
+    const mention = "I will end with a <proposed_plan> block once we agree.";
+    expect(splitProposedPlan(mention)).toEqual({ text: mention });
   });
 });

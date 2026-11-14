@@ -22,7 +22,7 @@ test("parses a valid hello message", () => {
   }
 });
 
-test("parses tool_result with ok=true and arbitrary result", () => {
+test("parses tool_result with ok=true and a result, or ok=false and an error", () => {
   const r = parseFromDeviceMessage(JSON.stringify({
     type: "tool_result",
     callId: "abc-123",
@@ -35,18 +35,16 @@ test("parses tool_result with ok=true and arbitrary result", () => {
     expect(r.message.ok).toBe(true);
     expect(r.message.result).toEqual({ foo: "bar" });
   }
-});
 
-test("parses tool_result with ok=false and error string", () => {
-  const r = parseFromDeviceMessage(JSON.stringify({
+  const failed = parseFromDeviceMessage(JSON.stringify({
     type: "tool_result",
     callId: "abc",
     ok: false,
     error: "device exploded",
   }));
-  if (r.ok && r.message.type === "tool_result") {
-    expect(r.message.ok).toBe(false);
-    expect(r.message.error).toBe("device exploded");
+  if (failed.ok && failed.message.type === "tool_result") {
+    expect(failed.message.ok).toBe(false);
+    expect(failed.message.error).toBe("device exploded");
   }
 });
 
@@ -66,29 +64,25 @@ test("rejects invalid JSON", () => {
   if (!r.ok) expect(r.error).toBe("Invalid JSON");
 });
 
-test("rejects messages with unknown type", () => {
+test("rejects unknown types, hello with a malformed tool inputSchema, and hello with an unknown platform", () => {
   const r = parseFromDeviceMessage(JSON.stringify({ type: "bogus" }));
   expect(r.ok).toBe(false);
-});
 
-test("rejects hello with malformed tool inputSchema", () => {
-  const r = parseFromDeviceMessage(JSON.stringify({
+  const malformedSchema = parseFromDeviceMessage(JSON.stringify({
     type: "hello",
     deviceId: "phone-1",
     deviceName: "Test Phone",
     platform: "ios",
     tools: [{ name: "x", description: "y", inputSchema: { type: "array" } }],
   }));
-  expect(r.ok).toBe(false);
-});
+  expect(malformedSchema.ok).toBe(false);
 
-test("rejects hello with unknown platform", () => {
-  const r = parseFromDeviceMessage(JSON.stringify({
+  const unknownPlatform = parseFromDeviceMessage(JSON.stringify({
     type: "hello",
     deviceId: "phone-1",
     deviceName: "Test Phone",
     platform: "windows",
     tools: [],
   }));
-  expect(r.ok).toBe(false);
+  expect(unknownPlatform.ok).toBe(false);
 });

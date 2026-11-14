@@ -35,18 +35,16 @@ describe("adding and refreshing", () => {
     });
   });
 
-  test("the next run updates it: facts change, first seen stays, last seen moves", () => {
+  test("the next run updates it: facts change, first seen stays, last seen moves, check results stay", () => {
     merge([found({ key: "a", port: 3000, image: "a:1" })]);
     const result = merge([found({ key: "a", port: 4000, image: "a:2", exposure: "tailnet" })], 5);
     expect(result.summary).toMatchObject({ created: 0, updated: 1 });
     expect(getTarget("a")).toMatchObject({ port: 4000, image: "a:2", exposure: "tailnet", firstSeen: new Date(NOW).toISOString(), lastSeen: new Date(NOW + 5 * MINUTE).toISOString() });
-  });
 
-  test("a run leaves what the checks decided alone: status, since and last check", () => {
-    merge([found({ key: "a" })]);
-    db.update(monitorTargets).set({ status: "down", statusSince: iso(1), lastCheckedAt: NOW + MINUTE }).run();
-    merge([found({ key: "a" })], 5);
-    expect(getTarget("a")).toMatchObject({ status: "down", statusSince: iso(1), lastCheckedAt: NOW + MINUTE });
+    // What the checks decided stays: status, since and last check.
+    db.update(monitorTargets).set({ status: "down", statusSince: iso(6), lastCheckedAt: NOW + 6 * MINUTE }).run();
+    merge([found({ key: "a" })], 10);
+    expect(getTarget("a")).toMatchObject({ status: "down", statusSince: iso(6), lastCheckedAt: NOW + 6 * MINUTE });
   });
 });
 
@@ -57,6 +55,9 @@ describe("what a person edited stays", () => {
     expect(getTarget("a")!.userFields.sort()).toEqual(["expectedStatus", "hidden", "notes", "project", "title", "tracked"]);
     merge([found({ key: "a", title: "new title", project: "new", tracked: true, hidden: false })], 5);
     expect(getTarget("a")).toMatchObject({ title: "My app", tracked: false, hidden: true, project: "mine", notes: "check me", expectedStatus: 401 });
+    // Editing a field twice is still one entry.
+    patchTarget("a", { title: "again" });
+    expect(getTarget("a")!.userFields.filter((f) => f === "title")).toEqual(["title"]);
   });
 
   test("fields the person did not touch keep following discovery", () => {
@@ -64,13 +65,6 @@ describe("what a person edited stays", () => {
     patchTarget("a", { notes: "x" });
     merge([found({ key: "a", title: "two", project: "p2", tracked: true, hidden: false })], 5);
     expect(getTarget("a")).toMatchObject({ title: "two", project: "p2", tracked: true, hidden: false, notes: "x", userFields: ["notes"] });
-  });
-
-  test("editing a field twice is still one entry", () => {
-    merge([found({ key: "a" })]);
-    patchTarget("a", { title: "x" });
-    patchTarget("a", { title: "y" });
-    expect(getTarget("a")!.userFields).toEqual(["title"]);
   });
 });
 
@@ -89,17 +83,12 @@ describe("Kuma monitors", () => {
     });
   });
 
-  test("it keeps the Kuma monitor's own title, URL and tracking, whatever discovery wants", () => {
-    kuma({ title: "Main site" });
-    merge([found({ key: "apps.example.net", title: "apps.example.net", tracked: false, hidden: true, url: "https://apps.example.net" })]);
-    expect(getTarget("shop-fit")).toMatchObject({ title: "Main site", url: "https://apps.example.net/", tracked: true, hidden: false });
-  });
-
-  test("a project the person set is not replaced", () => {
-    kuma({ project: "Mine" });
+  test("it keeps the Kuma monitor's own title, URL and tracking, and a project the person set, whatever discovery wants", () => {
+    kuma({ title: "Main site", project: "Mine" });
     patchTarget("shop-fit", { project: "Mine" });
-    merge([found({ key: "apps.example.net", project: "shop" })]);
+    merge([found({ key: "apps.example.net", title: "apps.example.net", tracked: false, hidden: true, url: "https://apps.example.net", project: "shop" })]);
     expect(getTarget("shop-fit")!.project).toBe("Mine");
+    expect(getTarget("shop-fit")).toMatchObject({ title: "Main site", url: "https://apps.example.net/", tracked: true, hidden: false });
   });
 
   test("the hostname is matched without regard to case or path, and only against Kuma's HTTP monitors", () => {
@@ -108,12 +97,6 @@ describe("Kuma monitors", () => {
     merge([found({ key: "apps.example.net" }), found({ key: "other.example.com" })]);
     expect(getTarget("shop-fit")!.sources).toContain("traefik");
     expect(getTarget("other.example.com")).toBeDefined();
-  });
-
-  test("a Kuma monitor is never retired, however long discovery misses it", () => {
-    kuma();
-    for (let run = 0; run < 6; run++) merge([], run * 5);
-    expect(getTarget("shop-fit")).toMatchObject({ retiredAt: null, missedRuns: 0 });
   });
 
   test("a URL that names a container is linked to it, so the check can reach the container's address", () => {
@@ -165,24 +148,25 @@ describe("retiring", () => {
     expect(getTarget("a")).toMatchObject({ retiredAt: null, missedRuns: 0, firstSeen: new Date(NOW).toISOString() });
   });
 
-  test("a target made by hand is never retired", () => {
+  test("a target made by hand or a Kuma monitor is never retired, however long discovery misses it", () => {
     addTarget({ key: "hand" });
-    for (let i = 0; i < 5; i++) run(i, []);
+    addTarget({ key: "shop-fit", url: "https://apps.example.net/", sources: ["kuma:3", "traefik"] });
+    for (let i = 0; i < 6; i++) run(i, []);
     expect(getTarget("hand")).toMatchObject({ retiredAt: null, missedRuns: 0 });
+    expect(getTarget("shop-fit")).toMatchObject({ retiredAt: null, missedRuns: 0 });
   });
 
-  test("a run in which a source failed does not count against what that source found", () => {
+  test("a run in which a source failed does not count against what that source found, even with another source up", () => {
     run(0, [found({ key: "web", sources: ["traefik"] }), found({ key: "mini:5433", sources: ["docker"] })]);
     const docker = new Set(["traefik", "cloudflare", "dns", "listener"]); // docker did not answer
     for (let i = 1; i <= 4; i++) run(i, [], { okSources: docker });
     expect(getTarget("mini:5433")).toMatchObject({ retiredAt: null, missedRuns: 0 });
     expect(getTarget("web")!.retiredAt).not.toBeNull();
-  });
 
-  test("a target found by Traefik and the tunnel is only missed when both answered", () => {
-    run(0, [found({ key: "web", sources: ["traefik", "cloudflare"] })]);
-    for (let i = 1; i <= 4; i++) run(i, [], { okSources: new Set(["traefik"]) });
-    expect(getTarget("web")).toMatchObject({ retiredAt: null, missedRuns: 0 });
+    // A target found by Traefik and the tunnel is only missed when both answered.
+    run(5, [found({ key: "both", sources: ["traefik", "cloudflare"] })]);
+    for (let i = 6; i <= 9; i++) run(i, [], { okSources: new Set(["traefik"]) });
+    expect(getTarget("both")).toMatchObject({ retiredAt: null, missedRuns: 0 });
   });
 
   test("retiring ends the target's open incident", () => {
@@ -226,6 +210,10 @@ describe("warnings", () => {
     syncWarnings([finding("w1")], ["database-open-lan"], T0);
     syncWarnings([finding("w1", "new text")], ["database-open-lan"], T0 + 5 * MINUTE);
     expect(rows()).toEqual([{ key: "w1", kind: "database-open-lan", targetKey: "mini:5433", text: "new text", firstSeen: iso(0), lastSeen: iso(5), resolvedAt: null, notifiedAt: null, muted: false }]);
+    // A muted warning stays muted and a notified one stays notified when it repeats.
+    db.update(monitorWarnings).set({ muted: true, notifiedAt: iso(6) }).run();
+    syncWarnings([finding("w1")], ["database-open-lan"], T0 + 10 * MINUTE);
+    expect(rows()[0]).toMatchObject({ muted: true, notifiedAt: iso(6), lastSeen: iso(10) });
   });
 
   test("a warning the rules stop reporting is resolved, and one that comes back starts again", () => {
@@ -240,18 +228,10 @@ describe("warnings", () => {
     syncWarnings([finding("w1"), { key: "docker-reclaimable", kind: "docker-reclaimable", targetKey: null, text: "t" }], ["database-open-lan", "docker-reclaimable"], T0);
     syncWarnings([], ["database-open-lan"], T0 + 5 * MINUTE);
     expect(Object.fromEntries(rows().map((r) => [r.key, r.resolvedAt]))).toEqual({ w1: iso(5), "docker-reclaimable": null });
-  });
 
-  test("a warning of another phase's kind is never resolved by discovery", () => {
+    // A warning of another phase's kind is never resolved by discovery.
     db.insert(monitorWarnings).values({ key: "disk:mini", kind: "disk-high", text: "86%", firstSeen: iso(0), lastSeen: iso(0) }).run();
-    syncWarnings([], ["database-open-lan", "docker-reclaimable"], T0 + 5 * MINUTE);
-    expect(rows()[0].resolvedAt).toBeNull();
-  });
-
-  test("a muted warning stays muted and a notified one stays notified when it repeats", () => {
-    syncWarnings([finding("w1")], ["database-open-lan"], T0);
-    db.update(monitorWarnings).set({ muted: true, notifiedAt: iso(1) }).run();
-    syncWarnings([finding("w1")], ["database-open-lan"], T0 + 5 * MINUTE);
-    expect(rows()[0]).toMatchObject({ muted: true, notifiedAt: iso(1) });
+    syncWarnings([], ["database-open-lan", "docker-reclaimable"], T0 + 10 * MINUTE);
+    expect(rows().find((r) => r.key === "disk:mini")!.resolvedAt).toBeNull();
   });
 });

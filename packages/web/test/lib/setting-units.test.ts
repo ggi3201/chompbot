@@ -8,12 +8,10 @@ describe("setting units", () => {
     expect(displayFromRaw(String(MB / 2), MB)).toBe("0.5");
   });
 
-  it("round-trips the values people type", () => {
+  it("round-trips the values people type, keeping raw values whole and display values short", () => {
     expect(rawFromDisplay("0.5", MB)).toBe("524288");
     expect(displayFromRaw(rawFromDisplay("45", 60_000), 60_000)).toBe("45");
-  });
-
-  it("keeps raw values whole and display values short", () => {
+    // Raw values stay whole and display values short.
     expect(rawFromDisplay("0.123", MB)).toBe("128975");
     expect(displayFromRaw("2500000", MB)).toBe("2.38");
   });

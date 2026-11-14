@@ -24,20 +24,18 @@ beforeEach(() => { clearMonitoring(); vi.clearAllMocks(); });
 const job = () => addTarget({ key: "backup", title: "mini: pg dumps", kind: "push", pushToken: TOKEN, pushIntervalSec: 86_400, status: "up" });
 const push = (path: string, init?: RequestInit) => fetch(`${api.url}/api/monitoring/push/${path}`, init);
 
-test("GET push, as Kuma jobs call it, records an up push with its message and latency", async () => {
+test("GET push, as Kuma jobs call it, records an up push with its message and latency; no status is up", async () => {
   job();
   const res = await push(`${TOKEN}?status=up&msg=17%20dumps&ping=42`);
   expect(res.status).toBe(200);
   expect(await res.json()).toEqual({ ok: true });
   expect(getTarget("backup")).toMatchObject({ status: "up", lastPushOk: true, lastPushMsg: "17 dumps" });
   expect(db.select().from(monitorChecks).get()).toMatchObject({ ok: true, latencyMs: 42 });
-});
 
-test("a push without a status is up, and empty values from a URL template are ignored", async () => {
-  job();
+  // No status is up, and empty values from a URL template are ignored.
   expect((await push(`${TOKEN}`)).status).toBe(200);
   expect((await push(`${TOKEN}?status=up&msg=OK&ping=`)).status).toBe(200);
-  expect(db.select().from(monitorChecks).all().map((c) => [c.ok, c.latencyMs])).toEqual([[true, null], [true, null]]);
+  expect(db.select().from(monitorChecks).all().slice(1).map((c) => [c.ok, c.latencyMs])).toEqual([[true, null], [true, null]]);
 });
 
 test("status=down is a failed check at once, with the message as the error, and opens an incident a cycle later", async () => {
@@ -65,7 +63,7 @@ test("a long message is cut to 500 characters", async () => {
   expect(getTarget("backup")!.lastPushMsg).toHaveLength(500);
 });
 
-test("an unknown, malformed or non-push token gets 404 and records nothing", async () => {
+test("an unknown, malformed or non-push token, or a retired job, gets 404 and records nothing", async () => {
   job();
   addTarget({ key: "web", pushToken: "web_0123456789abcdefghijklmnopqr" });
   for (const token of ["nope", "a".repeat(40), "web_0123456789abcdefghijklmnopqr", "x".repeat(100)]) {
@@ -76,9 +74,9 @@ test("an unknown, malformed or non-push token gets 404 and records nothing", asy
     }
   }
   expect(db.select().from(monitorChecks).all()).toHaveLength(0);
-});
 
-test("a retired job no longer accepts pushes", async () => {
+  // A retired job no longer accepts pushes.
+  clearMonitoring();
   addTarget({ key: "old", kind: "push", pushToken: TOKEN, retiredAt: "2026-11-01T00:00:00.000Z" });
   expect((await push(TOKEN)).status).toBe(404);
 });

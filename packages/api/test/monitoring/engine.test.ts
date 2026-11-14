@@ -33,16 +33,13 @@ test("a new target is checked at once, and not again before its interval has pas
   expect(getTarget("web")!.lastCheckedAt).toBe(NOW + MINUTE);
 });
 
-test("untracked targets are checked every 5 minutes", async () => {
+test("untracked targets are checked every 5 minutes, and a retired one is left alone", async () => {
   web("quiet", { tracked: false });
-  await tick(0);
+  web("old", { retiredAt: "2026-11-01T00:00:00.000Z" });
+  expect(await tick(0)).toBe(1);
   expect(await tick(4)).toBe(0);
   expect(await tick(5)).toBe(1);
-});
-
-test("a retired target is left alone", async () => {
-  web("old", { retiredAt: "2026-11-01T00:00:00.000Z" });
-  expect(await tick(0)).toBe(0);
+  expect(getTarget("old")!.lastCheckedAt).toBeNull();
 });
 
 test("three failed checks, then one more cycle, open one incident, and two passes close it", async () => {

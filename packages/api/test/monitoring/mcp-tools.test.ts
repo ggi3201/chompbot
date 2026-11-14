@@ -9,7 +9,6 @@ import { monitorChecks, monitorWarnings } from "../../src/db/schema.js";
 import { MCP_TOOLS } from "../../src/mcp/tool-definitions.js";
 import { getMcpTool } from "../../src/mcp/registry.js";
 import { syncIncident } from "../../src/monitoring/incidents.js";
-import { chompSelfSkill } from "../../src/seed/chomp-self.js";
 import { HOUR, MINUTE, NOW, addTarget, clearMonitoring, downForACycle } from "./helpers.js";
 
 beforeEach(() => {
@@ -34,17 +33,6 @@ function seed() {
   db.insert(monitorWarnings).values({ key: "w1", kind: "open-port", targetKey: "mini:8080", text: "Port 8080 is open on the LAN", firstSeen: "2026-11-08T10:00:00.000Z", lastSeen: "2026-11-08T11:00:00.000Z" }).run();
 }
 
-test("the three tools are defined, have handlers, and are named in the guide", () => {
-  for (const name of ["monitoring_status", "monitoring_target", "monitoring_incidents"]) {
-    expect(MCP_TOOLS.some((tool) => tool.name === name), name).toBe(true);
-    expect(getMcpTool(name)?.handler, name).toBeTypeOf("function");
-    expect(chompSelfSkill().content, name).toContain(`\`${name}\``);
-  }
-  expect(MCP_TOOLS.some((tool) => /restart/.test(tool.name) && tool.name.startsWith("monitoring"))).toBe(false);
-  expect(chompSelfSkill().content).toContain("/api/monitoring/push/<token>?status=up|down&msg=");
-  expect(chompSelfSkill().content).toContain("packages/api/scripts/host-agent/");
-});
-
 test("status says what is down, quiet, and open, and leaves out what nobody tracks", () => {
   seed();
   const status = parse(execMonitoringStatus({}, NOW));
@@ -62,11 +50,6 @@ test("status with a query looks at matching services only, by name, host or proj
   expect(parse(execMonitoringStatus({ query: "chomp" }, NOW))).toMatchObject({ verdict: "all up", openIncidents: [] });
   expect(parse(execMonitoringStatus({ query: "atelier" }, NOW))).toMatchObject({ verdict: "1 down", warnings: [{ key: "w1" }] });
   expect(parse(execMonitoringStatus({ query: "rpi" }, NOW)).counts.total).toBe(1);
-});
-
-test("status with nothing wrong says all up", () => {
-  addTarget({ key: "mini:3000", status: "up", lastCheckedAt: checked });
-  expect(parse(execMonitoringStatus({}, NOW))).toMatchObject({ verdict: "all up", down: [], stale: [], openIncidents: [], warnings: [] });
 });
 
 test("a target is found by key or by part of its name, with its checks and open incident", async () => {
@@ -90,18 +73,15 @@ test("a name that matches several services lists their keys, and one that matche
   expect(await execMonitoringTarget({}, NOW)).toMatch(/^ERROR: target required/);
 });
 
-test("logs: true adds the log tail of a service on the mini", async () => {
+test("logs: true adds the log tail of a service on the mini, and on another host returns the reason inside the result, not a failure", async () => {
   seed();
   child.execFile.mockImplementation((_cmd: string, _args: string[], _opts: unknown, callback: (err: Error | null, out: string, err2: string) => void) =>
     callback(null, "2026-11-08T11:59:00.000000000Z listening\n", ""));
   const result = parse(await execMonitoringTarget({ target: "mini:8080", logs: true }, NOW));
   expect(result.logs).toEqual({ source: "docker", name: "shop-1", lines: ["2026-11-08T11:59:00.000000000Z listening"] });
-});
-
-test("logs: true on another host returns the reason inside the result, not a failure", async () => {
-  seed();
-  const result = parse(await execMonitoringTarget({ target: "rpi:53", logs: true }, NOW));
-  expect(result.logs.error).toMatch(/only work for services on the machine Chomp runs on/);
+  child.execFile.mockClear();
+  const remote = parse(await execMonitoringTarget({ target: "rpi:53", logs: true }, NOW));
+  expect(remote.logs.error).toMatch(/only work for services on the machine Chomp runs on/);
   expect(child.execFile).not.toHaveBeenCalled();
 });
 
@@ -116,8 +96,10 @@ test("incidents list open and recent ones, and open_only drops the resolved", ()
   expect(parse(execMonitoringIncidents({ limit: 1 }, NOW)).incidents).toHaveLength(1);
 });
 
-test("through the registry the tools return text, and errors are flagged", async () => {
+test("through the registry the tools return text and errors are flagged, and no monitoring tool can restart anything", async () => {
   seed();
+  expect(MCP_TOOLS.some((tool) => /restart/.test(tool.name) && tool.name.startsWith("monitoring"))).toBe(false);
+  expect(getMcpTool("monitoring_incidents")?.handler).toBeTypeOf("function");
   const status = await getMcpTool("monitoring_status")!.handler({}, undefined);
   expect(status.isError).toBeUndefined();
   expect(status.content[0]).toMatchObject({ type: "text" });

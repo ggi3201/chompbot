@@ -39,6 +39,9 @@ test("docker: name, image without digest, compose project, state, health, restar
   expect(byName.minio.image).toBe("minio/minio");
   expect(byName["status-app_tiles"]).toMatchObject({ state: "exited", project: null, ips: [], ports: [] });
   expect(byName.redis.health).toBeNull();
+  // On two networks a container has an address on each, which Traefik may name either of.
+  expect(byName.recipes_api.ips).toEqual(["172.19.0.3", "172.18.0.8"]);
+  expect(byName["shop-app-app-1"].ips).toContain("172.18.0.9");
 });
 
 test("docker: a published port appears once although Docker lists IPv4 and IPv6, with the container's own port", () => {
@@ -55,12 +58,6 @@ test("docker: an empty host IP means every address, and UDP is ignored", () => {
     NetworkSettings: { Ports: { "53/udp": [{ HostIp: "0.0.0.0", HostPort: "53" }], "80/tcp": [{ HostIp: "", HostPort: "8080" }] }, Networks: { a: { IPAddress: "" }, b: { IPAddress: "172.20.0.4" } } },
   }]);
   expect(c).toMatchObject({ ports: [{ port: 8080, containerPort: 80, bind: "0.0.0.0" }], ips: ["172.20.0.4"], restarts: 2, oomKilled: true, project: null });
-});
-
-test("docker: a container on two networks has an address on each, which Traefik may name either of", () => {
-  const byName = Object.fromEntries(containers().map((c) => [c.name, c]));
-  expect(byName.recipes_api.ips).toEqual(["172.19.0.3", "172.18.0.8"]);
-  expect(byName["shop-app-app-1"].ips).toContain("172.18.0.9");
 });
 
 test("ss: every address form, with process and pid where ss could see them", () => {

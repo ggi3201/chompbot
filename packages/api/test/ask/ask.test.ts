@@ -80,7 +80,7 @@ test("every reply of the turn is returned, in order", async () => {
   expect((await (await post({ question: "Find it" })).json()).reply).toBe("Looking.\n\nFound it.");
 });
 
-test("a slow answer comes as a push after the phone stopped waiting", async () => {
+test("a slow answer comes as a push after the phone stopped waiting, or goes to the other channels when no phone can be reached", async () => {
   db.insert(devicePushTokens).values({ deviceId: "phone", apnsToken: "token", environment: "production", updatedAt: new Date().toISOString() }).run();
   let finish: (result: object) => void = () => {};
   dispatchToAgent.mockReturnValue(new Promise((resolve) => { finish = resolve; }));
@@ -93,14 +93,10 @@ test("a slow answer comes as a push after the phone stopped waiting", async () =
   finish({ response: "Done planning.", agentUsed: "Alfred" });
   await vi.waitFor(() => expect(sendAlertPush).toHaveBeenCalledWith(expect.objectContaining({ title: "Chomp", body: "Done planning." })));
   expect(notify).not.toHaveBeenCalled();
-});
 
-test("a slow answer goes to the other channels when no phone can be reached", async () => {
-  let finish: (result: object) => void = () => {};
+  db.delete(devicePushTokens).run();
   dispatchToAgent.mockReturnValue(new Promise((resolve) => { finish = resolve; }));
-
   const { conversationId } = await (await post({ question: "Plan my week" }, "ask-impatient")).json();
-
   finish({ response: "Done planning.", agentUsed: "Alfred" });
   await vi.waitFor(() => expect(notify).toHaveBeenCalledWith(expect.objectContaining({ body: "Done planning.", conversationId, broadcast: true })));
 });

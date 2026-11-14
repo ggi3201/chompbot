@@ -43,11 +43,10 @@ test("all-day items come first, then by time", () => {
     { summary: "All day", start: { date: "2026-11-05" }, end: { date: "2026-11-06" } },
   ], [], OSLO);
   expect(day.items.map((item) => item.title)).toEqual(["All day", "Early", "Late"]);
-});
 
-test("an event without a title still shows", () => {
-  const [day] = buildWeek("2026-11-05", [{ start: { dateTime: "2026-11-05T07:00:00Z" }, end: {} }], [], OSLO);
-  expect(day.items[0].title).toBe("Busy");
+  // an event without a title still shows
+  const [untitled] = buildWeek("2026-11-05", [{ start: { dateTime: "2026-11-05T07:00:00Z" }, end: {} }], [], OSLO);
+  expect(untitled.items[0].title).toBe("Busy");
 });
 
 test("travel from mail joins the week in time order, and outside the week it is dropped", () => {

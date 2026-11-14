@@ -12,9 +12,7 @@ describe("hostnames", () => {
     const hostnames = found.filter((f) => f.url?.startsWith("https://"));
     expect(hostnames.filter((f) => f.tracked && f.sources.some((s) => s === "traefik" || s === "cloudflare"))).toHaveLength(hostnames.length - 1);
     expect(byKey(found, "recipesapi.apps.example.net")).toMatchObject({ kind: "http", url: "https://recipesapi.apps.example.net", tracked: true, hidden: false, title: "recipesapi.apps.example.net" });
-  });
-
-  test("a hostname on Traefik and in the tunnel remembers both, and depends on the host, Traefik and the tunnel", () => {
+    // On Traefik and in the tunnel: remembers both, and depends on the host, Traefik and the tunnel.
     expect(byKey(found, "recipesapi.apps.example.net")).toMatchObject({
       sources: ["traefik", "cloudflare"],
       dependsOn: ["host:mini", "infra:traefik", "infra:tunnel"],
@@ -23,17 +21,18 @@ describe("hostnames", () => {
     expect(byKey(found, "board.home.example.com")).toMatchObject({ sources: ["traefik"], dependsOn: ["host:mini", "infra:traefik"] });
   });
 
-  test("a hostname served by a container takes its container, image and compose project", () => {
+  test("a hostname takes its backend's details: container, host service, or another machine", () => {
+    // A container: its container, image and compose project.
     expect(byKey(found, "recipes.apps.example.org")).toMatchObject({
       container: "recipes_landing", image: "recipes-landing:latest", project: "recipes-landing", port: 3000, bindAddress: null,
       containerInfo: { state: "running", health: "healthy", restarts: 0, oomKilled: false },
     });
-  });
-
-  test("a hostname served by a host service takes its port, bind address and systemd unit", () => {
+    // A host service: its port, bind address and systemd unit.
     expect(byKey(found, "portfolio.home.example.com")).toMatchObject({
       host: "mini", port: 4123, bindAddress: "0.0.0.0", systemdUnit: "portfolio-web.service", container: null, exposure: "lan",
     });
+    // A backend on another machine keeps that machine's address as the host.
+    expect(byKey(found, "api.apps.example.net")).toMatchObject({ host: "10.0.2.168", port: 8085, container: null, bindAddress: null });
   });
 
   test("with no compose project, the project is the hostname's domain, so a domain's sites group together", () => {
@@ -43,18 +42,12 @@ describe("hostnames", () => {
     expect(byKey(found, "api.service.example.org").project).toBe("rocket-backend"); // the compose project wins
   });
 
-  test("a backend on another machine keeps that machine's address as the host", () => {
-    expect(byKey(found, "api.apps.example.net")).toMatchObject({ host: "10.0.2.168", port: 8085, container: null, bindAddress: null });
-  });
-
-  test("a tunnel rule that goes straight to a local port needs no Traefik router", () => {
+  test("a tunnel rule that goes straight to a local port needs no Traefik router; one to Traefik with no router still depends on it", () => {
     expect(byKey(found, "coop.home.example.com")).toMatchObject({
       sources: ["cloudflare"], port: 8644, systemdUnit: "courier-gateway.service", dependsOn: ["host:mini", "infra:tunnel"], exposure: "public-tunnel",
     });
     expect(byKey(found, "webhooks.apps.example.net")).toMatchObject({ url: "https://webhooks.apps.example.net", port: 3002, dependsOn: ["host:mini", "infra:tunnel"] });
-  });
-
-  test("a tunnel rule to Traefik with no router is kept, tracked, and depends on Traefik: it will 404", () => {
+    // A tunnel rule to Traefik with no router is kept, tracked, and depends on Traefik: it will 404.
     expect(byKey(found, "ideas.home.example.com")).toMatchObject({ sources: ["cloudflare"], tracked: true, port: null, dependsOn: ["host:mini", "infra:traefik", "infra:tunnel"] });
   });
 
@@ -63,11 +56,8 @@ describe("hostnames", () => {
     expect(byKey(found, "apps.example.net")).toMatchObject({ container: "shop-app-app-1", port: 80 }); // the plain router, on the container's proxy-network address
   });
 
-  test("a DNS record on the home IP adds a hostname that nothing routes, untracked and public direct", () => {
+  test("exposure follows the widest reach: tunnel, LAN, or tailnet by the router's allow-list; a DNS record on the home IP is public direct", () => {
     expect(byKey(found, "direct.home.example.com")).toMatchObject({ sources: ["dns"], tracked: false, exposure: "public-direct", port: null });
-  });
-
-  test("exposure follows the widest reach: tunnel, LAN, or tailnet by the router's allow-list", () => {
     const exposure = Object.fromEntries(found.filter((f) => f.url?.startsWith("https://")).map((f) => [f.key, f.exposure]));
     expect(exposure["journeys.home.example.com"]).toBe("public-tunnel");
     expect(exposure["listings.home.example.com"]).toBe("lan"); // tailnet-only admits the LAN range too
@@ -86,6 +76,9 @@ describe("ports, containers and listeners", () => {
       project: "langfuse", tracked: false, hidden: false, exposure: "lan", sources: ["docker"],
       containerInfo: { state: "running", health: null, restarts: 0, oomKilled: false, ip: expect.stringMatching(/^172\./) },
     });
+    // A port that docker publishes is a container target only, not a second one from ss.
+    expect(found.filter((f) => f.key === "mini:5433")).toHaveLength(1);
+    expect(byKey(found, "mini:5433").sources).toEqual(["docker"]);
   });
 
   test("databases and caches get a TCP check, other containers an HTTP check", () => {
@@ -97,9 +90,7 @@ describe("ports, containers and listeners", () => {
     expect(byKey(found, "container:langfuse-postgres")).toMatchObject({ kind: "container", exposure: "local", tracked: false, port: null, url: null });
     expect(found.some((f) => f.key === "container:recipes_landing")).toBe(false);
     expect(found.some((f) => f.key === "container:shop-app-app-1")).toBe(false); // serves apps.example.net
-  });
-
-  test("an exited container gets no target of its own", () => {
+    // An exited container gets no target of its own.
     expect(found.some((f) => f.container === "status-app_tiles")).toBe(false);
   });
 
@@ -114,22 +105,14 @@ describe("ports, containers and listeners", () => {
     expect(byKey(found, "mini:6799")).toMatchObject({ title: "pv-files9", exposure: "local" });
     expect(byKey(found, "mini:44599")).toMatchObject({ exposure: "tailnet", bindAddress: "100.64.0.42" });
   });
-
-  test("a port that docker publishes is a container target only, not a second one from ss", () => {
-    expect(found.filter((f) => f.key === "mini:5433")).toHaveLength(1);
-    expect(byKey(found, "mini:5433").sources).toEqual(["docker"]);
-  });
 });
 
 describe("noise", () => {
   const { found } = plan();
   const hidden = (key: string) => byKey(found, key).hidden;
 
-  test("a port that Traefik or the tunnel fronts is hidden: the hostname already stands for it", () => {
+  test("a port that Traefik or the tunnel fronts, or of a container that serves a hostname, is hidden: the hostname already stands for it", () => {
     for (const key of ["mini:4123", "mini:4124", "mini:4126", "mini:4128", "mini:4131", "mini:4132", "mini:8644", "mini:3002", "mini:4130", "mini:4125"]) expect(hidden(key)).toBe(true);
-  });
-
-  test("the ports of a container that serves a hostname are hidden", () => {
     for (const key of ["mini:5124", "mini:5125", "mini:5126"]) expect(hidden(key)).toBe(true);
   });
 
@@ -138,11 +121,8 @@ describe("noise", () => {
     expect([hidden("mini:8000"), hidden("mini:9000"), hidden("mini:9443")]).toEqual([false, true, true]);
   });
 
-  test("a listener with no name but its port number is hidden", () => {
+  test("a listener with no name but its port number, or on loopback in the ephemeral range, is hidden; a low one is not", () => {
     for (const key of ["mini:22", "mini:53", "mini:631", "mini:11434", "mini:20241"]) expect(hidden(key)).toBe(true);
-  });
-
-  test("a loopback listener in the ephemeral port range is hidden, a low one is not", () => {
     expect(hidden("mini:43205")).toBe(true);
     expect(hidden("mini:38161")).toBe(true);
     expect(hidden("mini:4179")).toBe(false);
@@ -163,20 +143,16 @@ describe("warnings", () => {
   const { warnings } = plan();
   const keys = warnings.map((w) => w.key);
 
-  test("databases and caches on every address, as on the box today", () => {
+  test("databases, caches and admin UIs on every address, as on the box today", () => {
     expect(keys.filter((k) => k.startsWith("database-open-lan"))).toEqual(
       expect.arrayContaining(["database-open-lan:5433", "database-open-lan:5434", "database-open-lan:5435", "database-open-lan:5632", "database-open-lan:6379"]));
-  });
-
-  test("admin UIs on every address: Portainer, Dashy and Kuma, not code-server on loopback", () => {
+    // Admin UIs on every address: Portainer, Dashy and Kuma, not code-server on loopback.
     expect(keys.filter((k) => k.startsWith("admin-open-lan")).sort()).toEqual(["admin-open-lan:3001", "admin-open-lan:8000", "admin-open-lan:9000", "admin-open-lan:9090", "admin-open-lan:9443"]);
   });
 
-  test("the two tunnel hostnames with no router, not the ones that go straight to a port", () => {
+  test("the two tunnel hostnames with no router, not the ones that go straight to a port; the home IP and Docker space", () => {
     expect(keys.filter((k) => k.startsWith("tunnel-without-router")).sort()).toEqual(["tunnel-without-router:ideas.home.example.com", "tunnel-without-router:ideasapi.home.example.com"]);
-  });
-
-  test("a hostname on the home IP, and Docker space", () => {
+    // A hostname on the home IP, and Docker space.
     expect(keys).toContain("public-direct:direct.home.example.com");
     expect(keys).toContain("docker-reclaimable");
   });
@@ -191,16 +167,14 @@ describe("warnings", () => {
 });
 
 describe("a Mac with none of it", () => {
-  test("empty sources give no targets and no warnings", () => {
+  test("empty sources give no targets and no warnings; ss and Docker alone still show services", () => {
     const { found, warnings } = plan({ routes: [], tunnel: [], dns: [], homeIp: null, containers: [], listeners: [], dockerSpace: [], tailnetIps: [] });
     expect(found).toEqual([]);
     expect(warnings).toEqual([]);
-  });
-
-  test("with only ss and Docker, the services still show and nothing is tracked", () => {
-    const { found } = plan({ routes: [], tunnel: [], dns: [], homeIp: null });
-    expect(found.length).toBeGreaterThan(60);
-    expect(found.some((f) => f.tracked)).toBe(false);
+    // With only ss and Docker, the services still show and nothing is tracked.
+    const partial = plan({ routes: [], tunnel: [], dns: [], homeIp: null }).found;
+    expect(partial.length).toBeGreaterThan(60);
+    expect(partial.some((f) => f.tracked)).toBe(false);
   });
 });
 

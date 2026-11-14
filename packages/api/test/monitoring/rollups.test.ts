@@ -11,7 +11,7 @@ const check = (targetKey: string, ts: number, ok: boolean, latencyMs: number | n
   db.insert(monitorChecks).values({ targetKey, ts, vantage: "home", ok, latencyMs }).run();
 const rollups = () => db.select().from(monitorRollups).orderBy(monitorRollups.hour).all();
 
-test("an hour rolls up to passes, failures, and the latency of the passes", () => {
+test("an hour rolls up to passes, failures, and the latency of the passes; rolling up again updates the hour instead of adding a row", () => {
   addTarget({ key: "web" });
   const hour = hourStart(NOW - 3 * HOUR);
   check("web", hour + MINUTE, true, 10);
@@ -23,17 +23,10 @@ test("an hour rolls up to passes, failures, and the latency of the passes", () =
     { targetKey: "web", vantage: "home", hour, up: 2, down: 1, latencyAvg: 20, latencyMax: 30 },
     { targetKey: "web", vantage: "home", hour: hour + HOUR, up: 1, down: 0, latencyAvg: 5, latencyMax: 5 },
   ]);
-});
-
-test("rolling up again, with more checks, updates the hour instead of adding a row", () => {
-  addTarget({ key: "web" });
-  const hour = hourStart(NOW);
-  check("web", hour + MINUTE, true);
-  rollupSince(hour);
-  check("web", hour + 2 * MINUTE, false, null);
+  check("web", hour + HOUR + 2 * MINUTE, false, null);
   rollupSince(hour);
   rollupSince(hour);
-  expect(rollups()).toMatchObject([{ up: 1, down: 1 }]);
+  expect(rollups()).toMatchObject([{ up: 2, down: 1 }, { up: 1, down: 1 }]);
 });
 
 test("rolling up leaves older hours, such as imported history, alone", () => {
@@ -76,14 +69,11 @@ test("the nightly job also prunes host metrics after 7 days and resolved warning
   expect(db.select().from(monitorWarnings).all().map((w) => w.key).sort()).toEqual(["open", "recent"]);
 });
 
-test("history is always 30 days ending today, with gaps filled", () => {
+test("history is always 30 days ending today with gaps filled, and uptime floors so one failure in 100k checks never reads 100%", () => {
   const { days } = buildHistory([{ day: "2026-11-08", up: 10, down: 2 }], NOW);
   expect(days).toHaveLength(30);
   expect(days[0]).toEqual({ day: "2026-10-10", up: 0, down: 0 });
   expect(days[29]).toEqual({ day: "2026-11-08", up: 10, down: 2 });
-});
-
-test("uptime floors, so one failure in 100k checks never reads 100%", () => {
   expect(buildHistory([{ day: "2026-11-08", up: 99_999, down: 1 }], NOW).uptime).toBe(99.99);
   expect(buildHistory([{ day: "2026-11-08", up: 5, down: 0 }], NOW).uptime).toBe(100);
   expect(buildHistory([], NOW).uptime).toBeNull();

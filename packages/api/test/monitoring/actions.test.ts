@@ -70,7 +70,7 @@ test("logs of a container come from docker, stdout and stderr in time order, wit
   expect(calls).toEqual(["docker logs --tail 100 --timestamps web-1"]);
 });
 
-test("logs of a system unit come from journalctl", async () => {
+test("logs of a system unit come from journalctl, of a user unit from the user journal", async () => {
   unit();
   replies = [
     ["systemctl --user show", "not-found\n"],
@@ -79,9 +79,9 @@ test("logs of a system unit come from journalctl", async () => {
   const body = await (await get("/targets/mini%3A3000/logs")).json();
   expect(body).toEqual({ source: "journal", name: "atelier-api.service", lines: ["2026-11-08T12:00:00+0100 mini atelier[1]: ready"] });
   expect(calls).toContain("journalctl -u atelier-api.service -n 100 --no-pager -o short-iso");
-});
 
-test("logs of a user unit ask the user journal", async () => {
+  // A user unit asks the user journal.
+  clearMonitoring();
   unit("atelier-api");
   replies = [
     ["systemctl --user show -p LoadState --value atelier-api.service", "loaded\n"],
@@ -91,11 +91,12 @@ test("logs of a user unit ask the user journal", async () => {
   expect(calls).toContain("journalctl --user -u atelier-api.service -n 100 --no-pager -o short-iso");
 });
 
-test("a service on another host has no logs here, and the answer says so", async () => {
+test("a service on another host has no logs or restart here, and the answer says so", async () => {
   addTarget({ key: "rpi:80", host: "rpi", container: "pihole" });
   const res = await get("/targets/rpi%3A80/logs");
   expect(res.status).toBe(422);
   expect((await res.json()).error).toMatch(/only work for services on the machine Chomp runs on/);
+  expect((await post("/targets/rpi%3A80/restart")).status).toBe(422);
   expect(calls).toEqual([]);
 });
 
@@ -111,20 +112,17 @@ test("an unknown target is 404", async () => {
   expect((await post("/targets/nope/restart")).status).toBe(404);
 });
 
-test("a failing command is a 502 with the first line of what it said", async () => {
+test("a failing command is a 502 with the first line of what it said, a missing program says so", async () => {
   container();
   replies = [["docker logs", failed("Error response from daemon: No such container: web-1\nmore")]];
   const res = await get("/targets/mini%3A8080/logs");
   expect(res.status).toBe(502);
   expect(await res.json()).toEqual({ error: "Error response from daemon: No such container: web-1" });
-});
 
-test("a program that is not installed says so", async () => {
-  container();
   replies = [["docker logs", notFound("docker")]];
-  const res = await get("/targets/mini%3A8080/logs");
-  expect(res.status).toBe(502);
-  expect((await res.json()).error).toBe("docker is not installed on this machine");
+  const missing = await get("/targets/mini%3A8080/logs");
+  expect(missing.status).toBe(502);
+  expect((await missing.json()).error).toBe("docker is not installed on this machine");
 });
 
 test("a huge log is cut to its newest lines and long lines are shortened", async () => {
@@ -145,13 +143,14 @@ test("a container name that looks like an option is refused before any command r
 
 // ── Restart ─────────────────────────────────────────────────────────────
 
-test("a container restarts with docker", async () => {
+test("a container restarts with docker, and with no open incident writes no note", async () => {
   container();
   replies = [["docker restart web-1", "web-1\n"]];
   const res = await post("/targets/mini%3A8080/restart");
   expect(res.status).toBe(200);
   expect(await res.json()).toEqual({ ok: true, message: "Restarted container web-1" });
   expect(calls).toEqual(["docker restart web-1"]);
+  expect(db.select().from(incidentEvents).all()).toEqual([]);
 });
 
 test("a restart leaves a note in the open incident of the target", async () => {
@@ -164,13 +163,6 @@ test("a restart leaves a note in the open incident of the target", async () => {
   expect(notes[0].text).toBe("Restarted container web-1 from the Monitoring page");
 });
 
-test("with no open incident a restart writes no note", async () => {
-  container();
-  replies = [["docker restart", "web-1\n"]];
-  await post("/targets/mini%3A8080/restart");
-  expect(db.select().from(incidentEvents).all()).toEqual([]);
-});
-
 test("a failed restart is reported and leaves no note", async () => {
   container();
   downForACycle({ key: "mini:8080", title: "Web", tracked: true }, "refused", NOW);
@@ -181,16 +173,16 @@ test("a failed restart is reported and leaves no note", async () => {
   expect(db.select().from(incidentEvents).all().filter((e) => e.kind === "note")).toEqual([]);
 });
 
-test("a listed user unit restarts with systemctl --user", async () => {
+test("a listed user unit restarts with systemctl --user, a system unit through sudo -n", async () => {
   unit("atelier-api.service");
   saveSecret("MONITOR_RESTART_UNITS", "other, atelier-api");
   replies = [["systemctl --user show", "loaded\n"], ["systemctl --user restart atelier-api.service", ""]];
   const res = await post("/targets/mini%3A3000/restart");
   expect(await res.json()).toEqual({ ok: true, message: "Restarted unit atelier-api.service" });
   expect(calls).toContain("systemctl --user restart atelier-api.service");
-});
 
-test("a listed system unit restarts through sudo -n", async () => {
+  // A listed system unit restarts through sudo -n.
+  clearMonitoring();
   unit();
   saveSecret("MONITOR_RESTART_UNITS", "atelier-api.service");
   replies = [["systemctl --user show", "not-found\n"], ["sudo -n systemctl restart atelier-api.service", ""]];
@@ -222,12 +214,5 @@ test("chomp.service is never restarted, even when it is listed", async () => {
   const res = await post("/targets/mini%3A3000/restart");
   expect(res.status).toBe(403);
   expect((await res.json()).message).toMatch(/does not restart itself/);
-  expect(calls).toEqual([]);
-});
-
-test("a service on another host cannot be restarted from here", async () => {
-  addTarget({ key: "rpi:80", host: "rpi", container: "pihole" });
-  const res = await post("/targets/rpi%3A80/restart");
-  expect(res.status).toBe(422);
   expect(calls).toEqual([]);
 });

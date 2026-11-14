@@ -50,11 +50,13 @@ beforeAll(async () => {
 });
 afterAll(() => server.close());
 
-test("lists a folder, folders first, without .git", async () => {
+test("lists a folder, folders first, without .git; a chat without a project has none", async () => {
   const body = await (await get(`list?conversation=${CHAT}`)).json();
   expect(body.writable).toBe(true);
   expect(body.entries.map((e: { name: string; type: string }) => `${e.type}:${e.name}`)).toEqual(["dir:escape", "dir:src", "file:logo.png", "file:README.md"]);
   expect((await (await get(`list?conversation=${CHAT}&path=src`)).json()).entries[0]).toMatchObject({ name: "app.ts", path: "src/app.ts", size: 26 });
+  // A chat without a project has no files.
+  expect((await get(`list?conversation=${NO_PROJECT}`)).status).toBe(404);
 });
 
 test("reads text, and says what a binary file is without sending it", async () => {
@@ -85,10 +87,6 @@ test("saves, but refuses to overwrite a change made since the file was opened", 
   expect(readFileSync(join(root, "README.md"), "utf-8")).toBe("# Edited\n");
 });
 
-test("a chat without a project has no files", async () => {
-  expect((await get(`list?conversation=${NO_PROJECT}`)).status).toBe(404);
-});
-
 test("the server view hides credential stores and env files under home", async () => {
   const { isSecretPath } = await import("../../src/routes/files.js");
   expect(isSecretPath("/home/u", "/home/u/.ssh/id_ed25519")).toBe(true);
@@ -111,7 +109,7 @@ test("the server view lists home with absolute paths", async () => {
   expect(body.entries.some((e: { name: string }) => e.name === ".ssh")).toBe(false);
 });
 
-test.skipIf(!hasRipgrep)("searches file contents and names with ripgrep, literally", async () => {
+test.skipIf(!hasRipgrep)("searches file contents and names with ripgrep, literally, never through a symlink out", async () => {
   writeFileSync(join(root, "src", "notes.md"), "a -v line\nanswer here\n");
   const text = await (await get(`search?conversation=${CHAT}&q=answer`)).json();
   expect(text.hits).toEqual(expect.arrayContaining([
@@ -122,8 +120,6 @@ test.skipIf(!hasRipgrep)("searches file contents and names with ripgrep, literal
   expect((await (await get(`search?conversation=${CHAT}&q=-v`)).json()).hits).toEqual([{ path: "src/notes.md", line: 1, text: "a -v line" }]);
   expect((await (await get(`search?conversation=${CHAT}&q=APP.T&mode=names`)).json()).hits).toEqual([{ path: "src/app.ts" }]);
   expect((await get(`search?conversation=${CHAT}&q=`)).status).toBe(400);
-});
-
-test.skipIf(!hasRipgrep)("search never follows a symlink out of the project", async () => {
+  // Search never follows a symlink out of the project.
   expect((await (await get(`search?conversation=${CHAT}&q=nope`)).json()).hits).toEqual([]);
 });

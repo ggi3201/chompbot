@@ -56,11 +56,9 @@ test("it sends one alarm on the third failure in a row, with the last error", as
   assert.match(h.messages[0], /Last error: timeout/);
   assert.equal(h.state.alarmed, true);
   assert.equal(h.saves.length, 3);
-});
 
-test("a long outage sends no second alarm and writes nothing more", async () => {
-  const h = harness();
-  for (let minute = 1; minute <= 1000; minute++) await h.run(FAIL, minute);
+  // A long outage sends no second alarm and writes nothing more.
+  for (let minute = 4; minute <= 1000; minute++) await h.run(FAIL, minute);
   assert.equal(h.messages.length, 1);
   assert.equal(h.saves.length, 3);
 });

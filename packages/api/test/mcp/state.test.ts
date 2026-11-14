@@ -7,12 +7,9 @@ import {
 } from "../../src/mcp/state.js";
 
 describe("isChompReplyTool", () => {
-  test("matches the chomp reply tool under both server names", () => {
+  test("matches the chomp reply tool under both server names, and nothing else", () => {
     expect(isChompReplyTool("mcp__chomp-api__reply")).toBe(true);
     expect(isChompReplyTool("mcp__chomp__chomp_reply")).toBe(true);
-  });
-
-  test("ignores other tools", () => {
     expect(isChompReplyTool("mcp__chomp-api__ask_user")).toBe(false);
     expect(isChompReplyTool("mcp__claude_ai_Gmail__reply")).toBe(false);
     expect(isChompReplyTool("Bash")).toBe(false);

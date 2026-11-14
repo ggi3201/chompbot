@@ -8,12 +8,13 @@ beforeEach(() => {
   db.delete(settings).run();
 });
 
-test("seeds github_issue_repos with an empty array on a fresh database", () => {
+test("seeds github_issue_repos with an empty array on a fresh database, once however often it runs", () => {
+  seedDefaultSettings();
   seedDefaultSettings();
 
-  const row = db.select().from(settings).where(eq(settings.key, "github_issue_repos")).get();
-  expect(row).toBeDefined();
-  expect(row!.value).toBe("[]");
+  const rows = db.select().from(settings).where(eq(settings.key, "github_issue_repos")).all();
+  expect(rows).toHaveLength(1);
+  expect(rows[0].value).toBe("[]");
 });
 
 test("does not clobber an existing github_issue_repos value", () => {
@@ -26,11 +27,4 @@ test("does not clobber an existing github_issue_repos value", () => {
 
   const row = db.select().from(settings).where(eq(settings.key, "github_issue_repos")).get();
   expect(JSON.parse(row!.value)).toEqual(["example-org/chomp"]);
-});
-
-test("seedDefaultSettings is idempotent", () => {
-  seedDefaultSettings();
-  seedDefaultSettings();
-  const rows = db.select().from(settings).where(eq(settings.key, "github_issue_repos")).all();
-  expect(rows).toHaveLength(1);
 });

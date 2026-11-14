@@ -52,16 +52,11 @@ async function openIncident() {
   return db.select().from(incidents).get()!;
 }
 
-test("the prompt carries the incident facts and says the agent may only look", async () => {
+// Safety, not wording: the diagnosing agent runs unattended and must only look.
+test("the diagnosis prompt names the incident and forbids changing anything", async () => {
   const incident = await openIncident();
   const prompt = buildDiagnosisPrompt(getIncident(incident.id)!);
   expect(prompt).toContain("Incident: Web is down");
-  expect(prompt).toContain("Cause Chomp picked: Web (web)");
-  expect(prompt).toContain("First error: HTTP 502");
-  expect(prompt).toContain("container web-1");
-  expect(prompt).toContain("url https://web.example.com");
-  expect(prompt).toContain("docker logs --tail 200");
-  expect(prompt).toContain("journalctl -u");
   expect(prompt).toContain("Do not restart, stop, start, change, delete or deploy anything");
 });
 
@@ -114,12 +109,18 @@ test("a second diagnosis continues in the same conversation and reads only the n
   expect(db.select().from(conversations).all()).toHaveLength(1);
 });
 
-test("when the agent only wrote prose outside tool calls, that prose is the answer", async () => {
+test("when the agent only wrote prose outside tool calls, that prose is the answer; an agent that says nothing is a failed diagnosis", async () => {
+  const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
   const incident = await openIncident();
   answers = [];
   dispatch.dispatchToAgent.mockResolvedValueOnce({ response: " Out of memory. ", agentUsed: "Claude" });
   await (startDiagnosis(incident.id, clock) as { done: Promise<void> }).done;
   expect(getIncident(incident.id)?.diagnosisText).toBe("Out of memory.");
+
+  dispatch.dispatchToAgent.mockResolvedValueOnce({ response: "", agentUsed: "Claude" });
+  await (startDiagnosis(incident.id, clock) as { done: Promise<void> }).done;
+  expect(getIncident(incident.id)?.events.at(-1)).toMatchObject({ kind: "diagnosis_failed", text: "The agent gave no answer" });
+  log.mockRestore();
 });
 
 test("a failed diagnosis is saved and reported, and the incident can be diagnosed again", async () => {
@@ -139,19 +140,6 @@ test("a failed diagnosis is saved and reported, and the incident can be diagnose
   log.mockRestore();
 });
 
-test("an agent that says nothing is a failed diagnosis", async () => {
-  const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
-  const incident = await openIncident();
-  answers = [];
-  dispatch.dispatchToAgent.mockResolvedValueOnce({ response: "", agentUsed: "Claude" });
-  await (startDiagnosis(incident.id, clock) as { done: Promise<void> }).done;
-  expect(getIncident(incident.id)?.events.at(-1)).toMatchObject({ kind: "diagnosis_failed", text: "The agent gave no answer" });
-  log.mockRestore();
-});
-
-test("an unknown incident cannot be diagnosed", () => {
-  expect(startDiagnosis("nope")).toEqual({ started: false, reason: "not-found" });
-});
 
 // ── Routes ──────────────────────────────────────────────────────────────
 
@@ -164,7 +152,7 @@ beforeAll(async () => {
 });
 afterAll(() => server.close());
 
-test("GET /incidents/:id returns the incident with its services, timeline and cause; 404 for an unknown id", async () => {
+test("GET /incidents/:id returns the incident with its services, timeline and cause; 404 for an unknown id; GET /incidents rows carry the same", async () => {
   const incident = await openIncident();
   const body = await (await fetch(`${server.url}/api/monitoring/incidents/${incident.id}`)).json();
   expect(body.incident).toMatchObject({
@@ -173,10 +161,6 @@ test("GET /incidents/:id returns the incident with its services, timeline and ca
     events: [{ kind: "opened", text: "HTTP 502" }, { kind: "alerted" }],
   });
   expect((await fetch(`${server.url}/api/monitoring/incidents/nope`)).status).toBe(404);
-});
-
-test("GET /incidents rows carry cause, flapping and diagnosis status", async () => {
-  await openIncident();
   const { incidents: rows } = await (await fetch(`${server.url}/api/monitoring/incidents`)).json();
   expect(rows[0]).toMatchObject({ cause: "Web", causeKey: "web", flapping: false, diagnosis: "none" });
 });

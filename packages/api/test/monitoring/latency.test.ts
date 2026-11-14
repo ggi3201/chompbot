@@ -18,21 +18,17 @@ beforeEach(() => { clearMonitoring(); addTarget({ key: "web" }); });
 const check = (ts: number, latencyMs: number | null, extra: Partial<typeof monitorChecks.$inferInsert> = {}) =>
   db.insert(monitorChecks).values({ targetKey: "web", ts, ok: true, latencyMs, ...extra }).run();
 
-test("24 h is 96 quarter-hour buckets ending with the current one", () => {
-  const series = buildLatency("web", "24h", NOW + 5 * MINUTE);
-  expect(series.ts).toHaveLength(96);
-  expect(series.bucketMs).toBe(15 * MINUTE);
-  expect(series.ts.at(-1)).toBe(NOW);
-  expect(series.ts[0]).toBe(NOW - 95 * 15 * MINUTE);
-});
-
-test("a bucket is the rounded average of its passing checks, and a gap is null", () => {
+test("24 h is 96 quarter-hour buckets ending with the current one; a bucket is the rounded average of its passing checks, and a gap is null", () => {
   check(NOW + MINUTE, 100);
   check(NOW + 2 * MINUTE, 151);
   check(NOW + 3 * MINUTE, null, { ok: false, error: "timeout" });
   check(NOW + 4 * MINUTE, 9_000, { ok: false, error: "500" });
   check(NOW - 15 * MINUTE, 40);
-  const { home } = buildLatency("web", "24h", NOW + 5 * MINUTE);
+  const { home, ts, bucketMs } = buildLatency("web", "24h", NOW + 5 * MINUTE);
+  expect(ts).toHaveLength(96);
+  expect(bucketMs).toBe(15 * MINUTE);
+  expect(ts.at(-1)).toBe(NOW);
+  expect(ts[0]).toBe(NOW - 95 * 15 * MINUTE);
   expect(home).toHaveLength(96);
   expect(home.at(-1)).toBe(126);
   expect(home.at(-2)).toBe(40);
@@ -49,17 +45,14 @@ test("a vantage without data is an empty series, and checks older than the windo
   expect(buildLatency("web", "24h", NOW + 2 * DAY).home).toEqual([]);
 });
 
-test("outside checks fill their own series", () => {
+test("outside checks fill their own series, and other targets do not leak in", () => {
+  db.insert(monitorChecks).values({ targetKey: "other", ts: NOW, ok: true, latencyMs: 5 }).run();
   check(NOW, 30);
   check(NOW, 80, { vantage: "outside" });
   const series = buildLatency("web", "24h", NOW);
   expect(series.home.at(-1)).toBe(30);
   expect(series.outside.at(-1)).toBe(80);
-});
-
-test("other targets do not leak in", () => {
-  db.insert(monitorChecks).values({ targetKey: "other", ts: NOW, ok: true, latencyMs: 5 }).run();
-  expect(buildLatency("web", "24h", NOW).home).toEqual([]);
+  expect(series.home.filter((v) => v !== null)).toEqual([30]);
 });
 
 test("7 d is 168 hourly buckets read from the rollups", () => {

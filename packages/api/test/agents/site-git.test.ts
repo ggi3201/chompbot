@@ -46,11 +46,6 @@ test("configured author and explicit invite are honored", async () => {
     .toEqual(expect.arrayContaining(["repos/test-owner/test-site/collaborators/friend", "permission=admin"]));
 });
 
-test("explicit null skips inviting a collaborator", async () => {
-  expect(await execTrackSiteInGit("test-site", { inviteCollaborator: null })).toContain("No collaborator invited");
-  expect(calls().some(({ args }) => args.some((arg) => arg.includes("/collaborators/")))).toBe(false);
-});
-
 test("SITE_GIT_INVITE_COLLABORATOR is the default invite, and explicit null still skips it", async () => {
   vi.stubEnv("SITE_GIT_INVITE_COLLABORATOR", "owner-login");
   expect(await execTrackSiteInGit("test-site")).toContain("Invited owner-login as admin");

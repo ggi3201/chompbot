@@ -76,21 +76,16 @@ describe("signature", () => {
     expect(outsideChecks()).toMatchObject([{ targetKey: "grafana", vantage: "outside", ok: true, statusCode: 200, latencyMs: 84, error: null, ts }]);
   });
 
-  test("a wrong signature, a wrong secret and a missing header are all 401 and store nothing", async () => {
+  test("a wrong signature, a wrong secret, a missing header and a re-dated timestamp are all 401 and store nothing", async () => {
     publicTarget();
     const body = JSON.stringify(report([pass("grafana")]));
     expect((await post(body, { signature: `sha256=${"0".repeat(64)}` })).status).toBe(401);
     expect((await post(body, { signature: sign(seconds(), body, "another-secret") })).status).toBe(401);
     expect((await post(body, { signature: "sha256=abc" })).status).toBe(401);
     expect((await post(body, { signature: null })).status).toBe(401);
+    // The timestamp is part of what is signed.
+    expect((await post(body, { timestamp: seconds(NOW + 1000), signature: sign(seconds(), body) })).status).toBe(401);
     expect(outsideChecks()).toEqual([]);
-  });
-
-  test("the timestamp is part of what is signed", async () => {
-    publicTarget();
-    const body = JSON.stringify(report([pass("grafana")]));
-    const res = await post(body, { timestamp: seconds(NOW + 1000), signature: sign(seconds(), body) });
-    expect(res.status).toBe(401);
   });
 
   test("a correctly signed timestamp outside the 300 s window is 401, old or from the future", async () => {
@@ -148,7 +143,7 @@ describe("signature", () => {
 });
 
 describe("partial reports", () => {
-  test("a URL missing from a report is not down, and keys Chomp does not know are ignored", async () => {
+  test("a URL missing from a report is not down, and keys Chomp does not know or has retired are ignored", async () => {
     publicTarget("a");
     publicTarget("b");
     await post(report([pass("a")], { ts: NOW - 2 * MINUTE }));
@@ -158,9 +153,7 @@ describe("partial reports", () => {
     expect(outsideChecks().filter((c) => c.targetKey === "b")).toHaveLength(1);
     expect(outsideRow("b", NOW)).toMatchObject({ state: "up" });
     expect(outsideRow("a", NOW)).toMatchObject({ state: "up", error: "HTTP 502" });
-  });
 
-  test("a retired target takes no results", async () => {
     addTarget({ key: "old", exposure: "public-tunnel", retiredAt: new Date(NOW).toISOString() });
     expect(await (await post(report([pass("old")]))).json()).toMatchObject({ stored: 0, unknownKeys: 1 });
   });

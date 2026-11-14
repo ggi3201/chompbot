@@ -20,7 +20,8 @@ test("without an account id, the token's only account is used, and it is looked 
   expect(fetch).toHaveBeenCalledTimes(1);
 });
 
-test("a token that sees several accounts asks for the account id", async () => {
+test("no token means not configured, and a token that sees several accounts asks for the account id", async () => {
+  await expect(credentials()).rejects.toThrow("Not configured");
   saveSecret("CLOUDFLARE_API_TOKEN", "token-two");
   vi.stubGlobal("fetch", accounts(["a", "b"]));
   await expect(credentials()).rejects.toThrow("The token sees 2 accounts. Set CLOUDFLARE_ACCOUNT_ID in Settings.");
@@ -33,8 +34,4 @@ test("a set account id is used without a lookup", async () => {
   vi.stubGlobal("fetch", fetch);
   expect(await credentials()).toEqual({ token: "token-three", account: "set-account" });
   expect(fetch).not.toHaveBeenCalled();
-});
-
-test("no token means not configured", async () => {
-  await expect(credentials()).rejects.toThrow("Not configured");
 });

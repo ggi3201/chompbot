@@ -30,16 +30,13 @@ const post = async (id: string, headers: Record<string, string> = {}) =>
   (await fetch(`${api.url}/api/webhooks/receive/${id}`, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: BODY })).status;
 const sign = (secret: string) => "sha256=" + createHmac("sha256", secret).update(BODY).digest("hex");
 
-test("a request with no proof of the secret is rejected", async () => {
-  expect(await post("signed")).toBe(401);
-});
-
 test("a signature over the exact bytes sent is accepted, in either header", async () => {
   expect(await post("signed", { "x-hub-signature-256": sign(SECRET) })).toBe(200);
   expect(await post("signed", { "x-webhook-signature": sign(SECRET) })).toBe(200);
 });
 
-test("a wrong signature is rejected, even from a logged-in caller", async () => {
+test("no proof of the secret, or a wrong signature even from a logged-in caller, is rejected", async () => {
+  expect(await post("signed")).toBe(401);
   expect(await post("signed", { "x-webhook-signature": sign("other"), authorization: `Bearer ${createToken()}` })).toBe(401);
 });
 

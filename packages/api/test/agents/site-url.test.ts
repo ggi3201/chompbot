@@ -5,11 +5,8 @@ import express from "express";
 import { expect, test } from "vitest";
 import { getSiteUrl } from "../../src/agents/tools/sites.js";
 
-test("own web server: the link is on PREVIEW_DOMAIN", () => {
+test("own web server links on PREVIEW_DOMAIN; with no setup Chomp serves the site under /pub on its own address", () => {
   expect(getSiteUrl("menu", { PREVIEW_DOMAIN: "sites.example.com", CHOMP_DOMAIN: "https://chomp.example.com" })).toBe("https://sites.example.com/menu");
-});
-
-test("no setup: Chomp serves the site under /pub on its own address", () => {
   expect(getSiteUrl("menu", { CHOMP_DOMAIN: "https://box.example-tailnet.ts.net/" })).toBe("https://box.example-tailnet.ts.net/pub/menu/");
   expect(getSiteUrl("menu", { PORT: "3002" })).toBe("http://localhost:3002/pub/menu/");
 });

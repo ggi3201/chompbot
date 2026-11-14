@@ -16,18 +16,14 @@ import {
 const LINE = { d: "M10 10 L 90 90" };
 const PNG_SIGNATURE = "89504e47";
 
-test("a new sheet is the user's turn and empty", () => {
-  const s = createSketch({ title: "Dog" });
-  expect(readSketch(s.id)).toMatchObject({ title: "Dog", turn: "user", strokes: [] });
-});
-
 test("an unknown or malformed id reads as null, so it cannot walk the filesystem", () => {
   expect(readSketch("../../etc/passwd")).toBeNull();
   expect(readSketch("00000000-0000-0000-0000-000000000000")).toBeNull();
 });
 
-test("an agent's marks hand the turn back and replace its note; a user's marks do neither", () => {
+test("a new sheet is the user's turn and empty; an agent's marks hand the turn back and replace its note, a user's do neither", () => {
   const s = createSketch({ title: "Logo", note: "start" });
+  expect(readSketch(s.id)).toMatchObject({ title: "Logo", turn: "user", strokes: [] });
   updateSketch(s.id, { turn: "agent" });
   expect(addStrokes(s.id, [LINE], "user")).toMatchObject({ turn: "agent", note: "start" });
   expect(addStrokes(s.id, [LINE], "agent", { note: "Is this it?" })).toMatchObject({ turn: "user", note: "Is this it?" });

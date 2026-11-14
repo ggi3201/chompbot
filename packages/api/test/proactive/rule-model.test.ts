@@ -52,8 +52,8 @@ test("validateCreateProactiveRule applies defaults and normalizes action config"
   });
 });
 
-test("validateCreateProactiveRule accepts script gate action config", () => {
-  const result = validateCreateProactiveRule({
+test("validateCreateProactiveRule accepts script gate action config, flat or with grouped conditions", () => {
+  const flat = validateCreateProactiveRule({
     name: "ACME gate",
     triggerType: "periodic",
     actionType: "script_gate",
@@ -64,16 +64,14 @@ test("validateCreateProactiveRule accepts script gate action config", () => {
     },
   });
 
-  expect(result.ok).toBe(true);
-  if (!result.ok) return;
-  expect(result.value.actionConfig).toEqual({
+  expect(flat.ok).toBe(true);
+  if (!flat.ok) return;
+  expect(flat.value.actionConfig).toEqual({
     script: "market_quote_threshold",
     input: { ticker: "ACME", buyBelow: 55 },
     onTrue: { agent: "Alfred", prompt: "Gate fired:\n{{gateResult}}" },
   });
-});
 
-test("validateCreateProactiveRule accepts grouped script gate conditions", () => {
   const result = validateCreateProactiveRule({
     name: "KTOS reversal gate",
     triggerType: "periodic",
@@ -110,7 +108,7 @@ test("validateCreateProactiveRule accepts grouped script gate conditions", () =>
   });
 });
 
-test("validateCreateProactiveRule defaults to every day unless guard rules are provided", () => {
+test("validateCreateProactiveRule defaults to every day unless guard rules, market or not, are provided", () => {
   const everyday = validateCreateProactiveRule({
     name: "Every day",
     triggerType: "periodic",
@@ -143,10 +141,8 @@ test("validateCreateProactiveRule defaults to every day unless guard rules are p
       phase: "regular",
     }],
   });
-});
 
-test("validateCreateProactiveRule accepts non-market guard rules", () => {
-  const result = validateCreateProactiveRule({
+  const nonMarket = validateCreateProactiveRule({
     name: "Weekday campaign",
     triggerType: "periodic",
     actionType: "run_agent",
@@ -160,8 +156,7 @@ test("validateCreateProactiveRule accepts non-market guard rules", () => {
       },
     },
   });
-
-  expect(result.ok).toBe(true);
+  expect(nonMarket.ok).toBe(true);
 });
 
 test("validateUpdateProactiveRule rejects invalid active hours and channels", () => {
@@ -177,7 +172,7 @@ test("validateUpdateProactiveRule rejects invalid active hours and channels", ()
   expect(result.details.join("\n")).toMatch(/notificationChannels\.1/);
 });
 
-test("validateCreateProactiveRule rejects invalid jitter ranges", () => {
+test("validateCreateProactiveRule rejects invalid jitter ranges and malformed date range guards", () => {
   const result = validateCreateProactiveRule({
     name: "Jittered rule",
     triggerType: "periodic",
@@ -193,10 +188,8 @@ test("validateCreateProactiveRule rejects invalid jitter ranges", () => {
   if (result.ok) return;
 
   expect(result.details.join("\n")).toMatch(/jitterMaxMinutes/);
-});
 
-test("validateCreateProactiveRule rejects malformed date range guards", () => {
-  const result = validateCreateProactiveRule({
+  const badRange = validateCreateProactiveRule({
     name: "Bad campaign",
     triggerType: "periodic",
     actionType: "run_agent",
@@ -207,9 +200,9 @@ test("validateCreateProactiveRule rejects malformed date range guards", () => {
     },
   });
 
-  expect(result.ok).toBe(false);
-  if (result.ok) return;
-  expect(result.details.join("\n")).toMatch(/startsAt/);
+  expect(badRange.ok).toBe(false);
+  if (badRange.ok) return;
+  expect(badRange.details.join("\n")).toMatch(/startsAt/);
 });
 
 test("parseStoredProactiveRule falls back safely for malformed stored JSON", () => {

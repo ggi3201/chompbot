@@ -50,15 +50,9 @@ function open(params: Record<string, string>, origin = `http://${host}`) {
 }
 
 describe("the terminal socket", () => {
-  test("refuses a missing token, so the tab stops retrying", async () => {
+  test("refuses a missing token (so the tab stops retrying), a page from another site, and a terminal that does not exist", async () => {
     expect(await open({ id: terminalId }).closed).toBe(4001);
-  });
-
-  test("refuses a page from another site", async () => {
     expect(await open({ id: terminalId, token }, "https://evil.example").closed).toBe(4003);
-  });
-
-  test("refuses a terminal that does not exist", async () => {
     expect(await open({ id: "nope1234", token }).closed).toBe(4004);
   });
 

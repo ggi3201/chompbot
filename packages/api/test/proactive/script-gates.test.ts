@@ -36,7 +36,7 @@ const ktosReversalGate = {
   },
 };
 
-test("script gate supports grouped threshold conditions for bounded reversal entries", async () => {
+test("script gate matches grouped threshold conditions inside a bounded reversal band, and not outside it", async () => {
   mockYahooQuote(59, 6_000_000);
 
   const result = await runScriptGate(ktosReversalGate);
@@ -52,33 +52,28 @@ test("script gate supports grouped threshold conditions for bounded reversal ent
       { label: null, field: "volume", op: "gte", value: 5_000_000, actual: 6_000_000, matched: true },
     ],
   }]);
-});
 
-test("script gate does not match a reversal when price has already left the entry band", async () => {
+  // No match once the price has already left the entry band.
   mockYahooQuote(65.7, 8_000_000);
-
-  const result = await runScriptGate(ktosReversalGate);
-
-  expect(result.matched).toBe(false);
-  expect(result.summary).toContain("did not match");
-  expect(result.data?.matchedGroups).toEqual([]);
+  const left = await runScriptGate(ktosReversalGate);
+  expect(left.matched).toBe(false);
+  expect(left.summary).toContain("did not match");
+  expect(left.data?.matchedGroups).toEqual([]);
 });
 
-test("SEC news never sends requests without a configured contact identity", async () => {
+test("SEC news never sends requests without a configured contact identity, and uses it when set", async () => {
   vi.stubEnv("SEC_USER_AGENT", "");
   const fetcher = vi.fn();
   vi.stubGlobal("fetch", fetcher);
   const result = await runScriptGate({ script: "company_news_scan", input: { ticker: "TESTCONFIG", finnhub: false } });
   expect(fetcher).not.toHaveBeenCalled();
   expect(result.summary).toContain("SEC_USER_AGENT is not configured");
-});
 
-test("SEC requests use the configured contact identity", async () => {
   vi.stubEnv("SEC_USER_AGENT", "Example Assistant contact@example.com");
-  const fetcher = vi.fn(async () => new Response(JSON.stringify({}), { status: 200 }));
-  vi.stubGlobal("fetch", fetcher);
+  const configured = vi.fn(async () => new Response(JSON.stringify({}), { status: 200 }));
+  vi.stubGlobal("fetch", configured);
   await runScriptGate({ script: "company_news_scan", input: { ticker: "TESTCONFIG", finnhub: false } });
-  expect(fetcher).toHaveBeenCalledWith("https://www.sec.gov/files/company_tickers.json", {
+  expect(configured).toHaveBeenCalledWith("https://www.sec.gov/files/company_tickers.json", {
     headers: { "User-Agent": "Example Assistant contact@example.com" },
   });
 });

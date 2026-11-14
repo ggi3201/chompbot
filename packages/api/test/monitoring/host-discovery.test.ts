@@ -98,10 +98,6 @@ describe("planning for the Pi", () => {
     expect(found.filter((f) => f.port === 631 || f.port === 41963)).toEqual([]);
   });
 
-  test("a port nobody named is found but hidden, like the mini's", () => {
-    expect(byKey(found, "rpi:2222")).toMatchObject({ title: "port 2222", hidden: true });
-  });
-
   test("the portainer agent on every address is an admin warning named for the Pi, so it cannot clash with the mini's port", () => {
     expect(warnings.map((w) => w.key)).toEqual(["admin-open-lan:rpi:9001"]);
     expect(warnings[0]).toMatchObject({ targetKey: "rpi:9001", kind: "admin-open-lan" });

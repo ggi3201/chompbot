@@ -63,25 +63,20 @@ describe("riteReducer", () => {
     expect(state.error).toBe("It broke");
   });
 
-  it("goes back to the start when the first turn fails", () => {
-    const state = play([{ type: "begin" }, { type: "error", message: "It broke" }]);
-    expect(state.status).toBe("arrival");
-    expect(state.error).toBe("It broke");
+  it("goes back to the start when the first turn fails, but a problem elsewhere leaves the conversation alone", () => {
+    const failed = play([{ type: "begin" }, { type: "error", message: "It broke" }]);
+    expect(failed.status).toBe("arrival");
+    expect(failed.error).toBe("It broke");
+
+    const problem = play([{ type: "begin" }, { type: "say", text: "Hello" }, { type: "problem", message: "Mic blocked" }]);
+    expect(problem.messages).toHaveLength(1);
+    expect(problem.error).toBe("Mic blocked");
   });
 
-  it("a problem elsewhere leaves the conversation alone", () => {
-    const state = play([{ type: "begin" }, { type: "say", text: "Hello" }, { type: "problem", message: "Mic blocked" }]);
-    expect(state.messages).toHaveLength(1);
-    expect(state.error).toBe("Mic blocked");
-  });
-
-  it("shows a choice until the person answers", () => {
+  it("shows a choice until the person answers, and ignores one with nothing to choose between", () => {
     const shown = play([{ type: "begin" }, { type: "choice", options: ["Short.", "A longer reply."] }]);
     expect(shown.choice).toEqual(["Short.", "A longer reply."]);
     expect(riteReducer(shown, { type: "say", text: "The first" }).choice).toBeNull();
-  });
-
-  it("ignores a choice with nothing to choose between", () => {
     expect(riteReducer(ARRIVAL, { type: "choice", options: ["Only one"] }).choice).toBeNull();
   });
 
@@ -95,12 +90,9 @@ describe("riteReducer", () => {
       { type: "born" },
     ]);
     expect(finished.status).toBe("born");
+    expect(finished.speaker).toBe("nova");
     expect(riteReducer(finished, { type: "reset" })).toEqual(ARRIVAL);
     expect(riteReducer(finished, { type: "begin" })).toEqual({ ...ARRIVAL, status: "thinking" });
-  });
-
-  it("remembers the chosen voice", () => {
-    expect(riteReducer(ARRIVAL, { type: "speaker", voice: "nova" }).speaker).toBe("nova");
   });
 });
 
@@ -131,11 +123,8 @@ describe("readTurnEvents", () => {
 });
 
 describe("takeSpokenPieces", () => {
-  it("waits for the end of a sentence", () => {
+  it("waits for the end of a sentence, which needs whitespace after the punctuation, so 3.5 is not an ending", () => {
     expect(takeSpokenPieces("I am still writing this", 5)).toEqual({ pieces: [], rest: "I am still writing this" });
-  });
-
-  it("needs whitespace after the punctuation, so 3.5 is not an ending", () => {
     expect(takeSpokenPieces("It costs 3.5 kroner", 5).pieces).toEqual([]);
   });
 

@@ -92,14 +92,12 @@ test("starting the bot again does not register the reply callbacks twice", async
   expect(replyCallbacks.length).toBe(before);
 });
 
-test("a plain message continues an active chat", async () => {
+test("a plain message continues an active chat; after 6 quiet hours it starts a new chat and stays there", async () => {
   const active = chat(`active-${Date.now()}`, HOUR);
   makeCurrent(active);
   await handleDiscordMessage(fakeMessage(OWNER));
   expect(lastConversation()).toBe(active);
-});
 
-test("a plain message after 6 quiet hours starts a new chat and stays there", async () => {
   const stale = chat(`stale-${Date.now()}`, 7 * HOUR);
   makeCurrent(stale);
 

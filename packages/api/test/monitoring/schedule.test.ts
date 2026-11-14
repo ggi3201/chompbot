@@ -10,12 +10,14 @@ test("down after three failures in a row, and not before", () => {
   expect(nextStatus("up", [T, T])).toBe("up");
   expect(nextStatus("up", [T, T, T])).toBe("down");
   expect(nextStatus("up", [T, P, T, T])).toBe("up");
+  expect(nextStatus("up", [P, P, P])).toBe("up");
 });
 
 test("a down target needs two passes in a row to come back", () => {
   expect(nextStatus("down", [P, T, T])).toBe("down");
   expect(nextStatus("down", [P, P, T])).toBe("up");
   expect(nextStatus("down", [T, P, P])).toBe("down");
+  expect(nextStatus("down", [T, T, T, T])).toBe("down");
 });
 
 test("a target with no verdict yet is up after one pass, but down only after three failures", () => {
@@ -25,23 +27,13 @@ test("a target with no verdict yet is up after one pass, but down only after thr
   expect(nextStatus("unknown", [T, T, T])).toBe("down");
 });
 
-test("a status that already holds does not change on more of the same", () => {
-  expect(nextStatus("down", [T, T, T, T])).toBe("down");
-  expect(nextStatus("up", [P, P, P])).toBe("up");
-});
-
 test("a push job is judged on its latest word alone", () => {
   expect(nextStatus("up", [T], thresholdsFor("push"))).toBe("down");
   expect(nextStatus("down", [P], thresholdsFor("push"))).toBe("up");
 });
 
-test("tracked targets are checked every 60 s, untracked every 5 minutes, push jobs always every 60 s", () => {
-  expect(checkIntervalSec({ kind: "http", tracked: true })).toBe(60);
-  expect(checkIntervalSec({ kind: "http", tracked: false })).toBe(300);
+test("a target is due once its interval has passed since the last check (60 s tracked or push, 5 min untracked), or when it never ran", () => {
   expect(checkIntervalSec({ kind: "push", tracked: false })).toBe(60);
-});
-
-test("a target is due once its interval has passed since the last check, or when it never ran", () => {
   const target = { kind: "http", tracked: true, retiredAt: null } as const;
   const now = 1_000_000;
   expect(isDue({ ...target, lastCheckedAt: null }, now)).toBe(true);
